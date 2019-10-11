@@ -2,7 +2,10 @@ package main
 
 import (
 	"gin/lib"
+	"gin/model"
+	"io"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -11,7 +14,7 @@ import (
 )
 
 type (
-	User lib.User
+	User model.User
 	H    gin.H
 )
 
@@ -21,15 +24,27 @@ var (
 )
 
 func main() {
-	db = lib.Conn()
+	// 记录到文件。
+	f, _ := os.Create("gin.log")
+	gin.DefaultWriter = io.MultiWriter(f)
+	// 如果需要同时将日志写入文件和控制台，请使用以下代码。
+	// gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
+	db = model.Conn()
 	defer db.Close()
-	r := gin.Default()
-	r.GET("/people/", GetPeople)
-	r.GET("/people/:id", GetUser)
-	r.POST("/people", AddUser)
-	r.PUT("/people/:id", UpdateUser)
-	r.DELETE("/people/:id", DeleteUser)
-	r.Run(":8080")
+
+	ws := lib.GetWs()
+	defer ws.Close()
+
+	router := gin.Default()
+	router.Static("/assets", "./assets")
+	router.GET("/people/", GetPeople)
+	router.GET("/people/:id", GetUser)
+	router.POST("/people", AddUser)
+	router.PUT("/people/:id", UpdateUser)
+	router.DELETE("/people/:id", DeleteUser)
+	router.Any("/socket.io/*any", gin.WrapH(ws))
+	router.Run(":3333")
 }
 
 func DeleteUser(c *gin.Context) {

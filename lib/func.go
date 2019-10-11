@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 错误时 返回 true
+// 有错时 返回 true
 func SendErr(err error, c *gin.Context) bool {
 	if err == nil {
 		return false

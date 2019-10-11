@@ -1,4 +1,4 @@
-package lib
+package model
 
 import (
 	"log"
@@ -12,6 +12,7 @@ type User struct {
 	gorm.Model
 	Name     string
 	PassWord string
+	Email    string
 }
 
 func Conn() *gorm.DB {
