@@ -38,12 +38,17 @@ func main() {
 
 	router := gin.Default()
 	router.Static("/assets", "./assets")
-	router.GET("/people/", GetPeople)
-	router.GET("/people/:id", GetUser)
-	router.POST("/people", AddUser)
-	router.PUT("/people/:id", UpdateUser)
-	router.DELETE("/people/:id", DeleteUser)
 	router.Any("/socket.io/*any", gin.WrapH(ws))
+
+	{
+		v1 := router.Group("/v1")
+		v1.GET("/user/", GetUsers)
+		v1.GET("/user/:id", GetUser)
+		v1.POST("/user", AddUser)
+		v1.PUT("/user/:id", UpdateUser)
+		v1.DELETE("/user/:id", DeleteUser)
+	}
+
 	router.Run(":3333")
 }
 
@@ -102,7 +107,7 @@ func GetUser(c *gin.Context) {
 	}
 }
 
-func GetPeople(c *gin.Context) {
+func GetUsers(c *gin.Context) {
 	var t []User
 	if d := db.Find(&t); d.Error != nil {
 		c.AbortWithStatus(404)
