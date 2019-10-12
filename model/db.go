@@ -15,16 +15,22 @@ type User struct {
 	Password string
 }
 
-type ChatRoom struct {
+type Room struct {
 	gorm.Model
+	Name string
+}
+
+type RoomUser struct {
+	gorm.Model
+	RoomId uint
 	UserId uint
 }
 
 func Conn() *gorm.DB {
 	var err error
 	Db, err = gorm.Open("sqlite3", "./test.db")
-	//Db, _ = gorm.Open("mysql", "user:pass@tcp(127.0.0.1:3306)/database?charset=utf8&parseTime=True&loc=Local")
-	Db.AutoMigrate(&User{}, &ChatRoom{})
+	//Db, err = gorm.Open("mysql", "user:pass@tcp(127.0.0.1:3306)/database?charset=utf8&parseTime=True&loc=Local")
+	Db.AutoMigrate(&User{}, &Room{}, &RoomUser{})
 	if err != nil {
 		log.Println(err)
 	}

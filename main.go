@@ -3,9 +3,7 @@ package main
 import (
 	"gin/lib"
 	"gin/model"
-	_ "io"
 	"log"
-	_ "os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -39,15 +37,10 @@ func main() {
 
 	router := gin.Default()
 	router.Use(gin.Recovery())
-	router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Headers", "*")
-		c.Header("Access-Control-Allow-Methods", "*")
-		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
-		c.Request.Header.Del("Origin")
-	})
+	router.Use(lib.Cross)
 
 	router.Static("/assets", "./assets")
+	router.Static("/dist", "./dist")
 	router.Any("/socket.io/*any", gin.WrapH(ws))
 
 	{
