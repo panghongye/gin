@@ -1,4 +1,4 @@
-[GIN] 2019/10/12 - 13:36:10 | 200 |     294.498µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-TvHq
-[GIN] 2019/10/12 - 13:36:10 | 200 |      15.669µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-TvI2&sid=1
-[GIN] 2019/10/12 - 13:36:12 | 200 |     150.997µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-Tvjo
-[GIN] 2019/10/12 - 13:36:12 | 200 |      72.884µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-Tvk1&sid=2
+[GIN] 2019/10/12 - 14:05:28 | 200 |     571.628µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acQU
+[GIN] 2019/10/12 - 14:05:28 | 200 |     172.231µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acQu&sid=1
+[GIN] 2019/10/12 - 14:05:30 | 200 |      110.71µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acp2
+[GIN] 2019/10/12 - 14:05:30 | 200 |     820.603µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acpC&sid=2

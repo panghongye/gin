@@ -15,6 +15,11 @@ type User struct {
 	Email    string
 }
 
+type ChatRoom struct {
+	gorm.Model
+	User User
+}
+
 func Conn() *gorm.DB {
 	var err error
 	Db, err = gorm.Open("sqlite3", "./test.db")

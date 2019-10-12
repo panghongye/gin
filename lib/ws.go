@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/googollee/go-engine.io"
-	"github.com/googollee/go-socket.io"
+	engineio "github.com/googollee/go-engine.io"
+	socketio "github.com/googollee/go-socket.io"
 )
 
 func GetWs() *socketio.Server {
@@ -27,6 +27,7 @@ func GetWs() *socketio.Server {
 
 	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
 		log.Println("closed", msg)
+		server.BroadcastToRoom("room1", "chat message", s.ID()+"离开了")
 	})
 
 	server.OnEvent("/", "bye", func(s socketio.Conn) string {
@@ -38,7 +39,7 @@ func GetWs() *socketio.Server {
 
 	server.OnEvent("/", "chat message", func(s socketio.Conn, msg string) {
 		log.Println("chat message:", msg)
-		server.BroadcastToRoom("room1", "chat message", msg)
+		server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
 	})
 
 	go server.Serve()
