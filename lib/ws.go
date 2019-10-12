@@ -2,12 +2,14 @@ package lib
 
 import (
 	"log"
+	"time"
 
+	"github.com/googollee/go-engine.io"
 	"github.com/googollee/go-socket.io"
 )
 
 func GetWs() *socketio.Server {
-	server, err := socketio.NewServer(nil)
+	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Second, nil, nil})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -15,6 +17,7 @@ func GetWs() *socketio.Server {
 	server.OnConnect("/", func(s socketio.Conn) error {
 		server.JoinRoom("room1", s)
 		log.Println("connected:", s.ID(), s.RemoteAddr())
+		server.BroadcastToRoom("room1", "chat message", s.ID()+"已连接")
 		return nil
 	})
 
