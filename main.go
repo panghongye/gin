@@ -3,9 +3,9 @@ package main
 import (
 	"gin/lib"
 	"gin/model"
-	"io"
+	_ "io"
 	"log"
-	"os"
+	_ "os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -24,19 +24,29 @@ var (
 )
 
 func main() {
-	// 记录到文件。
-	f, _ := os.Create("gin.log")
-	gin.DefaultWriter = io.MultiWriter(f)
-	// 如果需要同时将日志写入文件和控制台，请使用以下代码。
-	// gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	{
+		// 记录到文件。
+		// f, _ := os.Create("gin.log")
+		// gin.DefaultWriter = io.MultiWriter(f)
+		// 如果需要同时将日志写入文件和控制台，请使用以下代码。
+		// gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	}
 
 	db = model.Conn()
 	defer db.Close()
-
 	ws := lib.GetWs()
 	defer ws.Close()
 
 	router := gin.Default()
+	router.Use(gin.Recovery())
+	router.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Headers", "*")
+		c.Header("Access-Control-Allow-Methods", "*")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+		c.Request.Header.Del("Origin")
+	})
+
 	router.Static("/assets", "./assets")
 	router.Any("/socket.io/*any", gin.WrapH(ws))
 
@@ -48,7 +58,6 @@ func main() {
 		v1.PUT("/user/:id", UpdateUser)
 		v1.DELETE("/user/:id", DeleteUser)
 	}
-
 	router.Run(":3333")
 }
 
