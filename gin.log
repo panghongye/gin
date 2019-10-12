@@ -1,4 +1,0 @@
-[GIN] 2019/10/12 - 14:05:28 | 200 |     571.628µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acQU
-[GIN] 2019/10/12 - 14:05:28 | 200 |     172.231µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acQu&sid=1
-[GIN] 2019/10/12 - 14:05:30 | 200 |      110.71µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acp2
-[GIN] 2019/10/12 - 14:05:30 | 200 |     820.603µs |             ::1 | GET      /socket.io/?EIO=3&transport=polling&t=Ms-acpC&sid=2
