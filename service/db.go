@@ -1,23 +1,31 @@
 package service
 
 import (
+	"gin/model/table"
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	"github.com/jinzhu/gorm"
 )
 
-var DB *gorm.DB
+var (
+	db *gorm.DB
+)
 
 func init() {
-	DB, err := gorm.Open("sqlite3", "./test.db")
-	//DB, err := gorm.Open("mysql", "user:pass@tcp(127.0.0.1:3306)/database?charset=utf8&parseTime=True&loc=Local")
+	var err error
+	db, err = gorm.Open("sqlite3", "./test.db")
+	//DB, err = gorm.Open("mysql", "user:pass@tcp(127.0.0.1:3306)/database?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
-		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
+		panic(err.Error())
 	}
-	// DB.AutoMigrate(&User{}, &UserInfo{}, &Group_info{}, &User_user_relation{}, &Group_msg{}, &Private_msg{}, &Group_user_relation{})
-
-	DB.LogMode(true)
-	DB.SingularTable(true)
-	// return DB
+	db.LogMode(true)
+	db.SingularTable(true) // 关闭复数表名，如果设置为true，`User`表的表名就会是`user`，而不是`users`
+	db.AutoMigrate(
+		new(table.UserInfo),
+		new(table.User_user_relation),
+		new(table.Group_msg),
+		new(table.Group_info),
+		new(table.Group_user_relation),
+		new(table.Private_msg),
+	)
 }

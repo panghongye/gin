@@ -2,29 +2,26 @@ package service
 
 import (
 	"gin/model/table"
-
-	"github.com/jinzhu/gorm"
 )
 
-type (
-	UserInfo table.UserInfo
-)
-
-func (_ UserInfo) Login(name string) *gorm.DB {
-	return DB.Where("name LIKE ?", name).Find(&UserInfo{})
-}
+type UserService struct{}
 
 // 模糊匹配用户
-func (_ UserInfo) FuzzyMatchUsers(name string) *gorm.DB {
-	return DB.Where("name LIKE ?", name).Find(&UserInfo{})
+func (this UserService) FuzzyMatchUsers(name string) *table.UserInfo {
+	t := new(table.UserInfo)
+	db.Where("name LIKE ?", name).Find(t)
+	return t
 }
 
-// 通过用户名查找非github用户信息 user_info
-func (_ UserInfo) FindDataByName(name string) *gorm.DB {
-	return DB.Where("name = ?", name).First(&UserInfo{})
+// 通过用户名查用户
+func (this UserService) FindDataByName(name string) *table.UserInfo {
+	t := new(table.UserInfo)
+	db.Where("name = ?", name).First(t)
+	return t
 }
 
-// 注册用户
-func (_ UserInfo) InsertData(user *UserInfo) *gorm.DB {
-	return DB.Create(user)
+// 新增用户
+func (this UserService) InsertData(user *table.UserInfo) *table.UserInfo {
+	db.Create(user)
+	return user
 }

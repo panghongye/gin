@@ -1,13 +1,13 @@
 package main
 
 import (
+	"gin/conf"
 	"gin/route"
-	"time"
-
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 func main() {
 	logrus.Info("【当前时间】", time.Now())
-	route.BuildRouter().Run(":6666")
+	route.BuildRouter().Run(conf.Port)
 }

@@ -2,9 +2,12 @@ package response
 
 // 响应码
 type Response struct {
-	Code int32       `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Code     int32       `json:"code"`
+	Message  string      `json:"message"`
+	Msg      string      `json:"msg"`
+	Success  bool        `json:"success"`
+	Data     interface{} `json:"data"`
+	UserInfo interface{} `json:"userInfo"`
 }
 
 // 分页数据
