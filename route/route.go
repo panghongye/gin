@@ -13,7 +13,7 @@ var (
 
 func BuildRouter() *gin.Engine {
 	router := gin.New()
-	router.Use(gin.Logger(), middleware.Cros)
+	router.Use(middleware.Cros, gin.Logger())
 	v1 := router.Group("api/v1")
 	{
 		v1.POST("/login", userCtrl.Login)
