@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 func Cros(c *gin.Context) {
@@ -26,5 +25,6 @@ func SendErr(err error, c *gin.Context) bool {
 	c.JSON(400, gin.H{
 		"err": err.Error(),
 	})
+	c.Abort()
 	return true
 }
