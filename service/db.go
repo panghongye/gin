@@ -2,6 +2,7 @@ package service
 
 import (
 	"gin/model/table"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -13,8 +14,8 @@ var (
 
 func init() {
 	var err error
-	db, err = gorm.Open("sqlite3", "./test.db")
-	//DB, err = gorm.Open("mysql", "user:pass@tcp(127.0.0.1:3306)/database?charset=utf8&parseTime=True&loc=Local")
+	// db, err = gorm.Open("sqlite3", "./test.db")
+	db, err = gorm.Open("mysql", "root:rootroot@tcp(127.0.0.1:3306)/ghchat?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic(err.Error())
 	}

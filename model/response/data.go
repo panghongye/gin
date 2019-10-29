@@ -12,6 +12,7 @@ type Response struct {
 	UserInfo struct {
 		table.UserInfo
 		Token string `json:"token"`
+		ID    uint   `json:"user_id"`
 	} `json:"userInfo"`
 }
 

@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -9,37 +10,32 @@ import (
 )
 
 func GetWs() *socketio.Server {
-	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Second, nil, nil})
+	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, 0, nil, nil})
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	server.OnConnect("/", func(s socketio.Conn) error {
-		server.JoinRoom("room1", s)
-		log.Println("connected:", s.ID(), s.RemoteAddr())
-		server.BroadcastToRoom("room1", "chat message", s.ID()+"已连接")
-		return nil
-	})
-
 	server.OnError("/", func(e error) {
 		log.Println("error:", e)
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
 		log.Println("closed", msg)
-		server.BroadcastToRoom("room1", "chat message", s.ID()+"离开了")
-	})
-
-	server.OnEvent("/", "bye", func(s socketio.Conn) string {
-		last := s.Context().(string)
-		s.Emit("bye", last)
 		s.Close()
-		return last
+		// server.BroadcastToRoom("room1", "chat message", s.ID()+"离开了")
 	})
 
-	server.OnEvent("/", "chat message", func(s socketio.Conn, msg string) {
-		log.Println("chat message:", msg)
-		server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
+	server.OnConnect("/", func(s socketio.Conn) error {
+		// s.SetContext("")
+		// server.JoinRoom("room1", s)
+		// log.Println("connected:", s.ID(), s.RemoteAddr())
+		// server.BroadcastToRoom("room1", "chat message", s.ID()+"已连接")
+		return nil
+	})
+
+	server.OnEvent("/", "initSocket", func(s socketio.Conn, msg string) {
+		// server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
+		fmt.Println("????", s.Namespace())
+		fmt.Println()
 	})
 
 	go server.Serve()

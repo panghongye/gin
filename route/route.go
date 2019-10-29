@@ -15,7 +15,7 @@ var (
 )
 
 func BuildRouter() *gin.Engine {
-	jwt.New("key", time.Hour)
+	jwt.New("0", time.Hour*100)
 	router := gin.Default()
 	router.Use(middleware.Cros)
 	{

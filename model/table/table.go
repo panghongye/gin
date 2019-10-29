@@ -4,16 +4,16 @@ import "github.com/jinzhu/gorm"
 
 type UserInfo struct {
 	gorm.Model
-	Github_id uint
-	Name      string
+	Github_id uint   `json:"github_id"`
+	Name      string `json:"name"`
 	Password  string
-	Avatar    string
-	Location  string
-	Socketid  string
-	Website   string
-	Github    string
-	Intro     string
-	Company   string
+	Avatar    string `json:"avatar"`
+	Location  string `json:"location"`
+	Socketid  string `json:"socketid"`
+	Website   string `json:"website"`
+	Github    string `json:"github"`
+	Intro     string `json:"intro"`
+	Company   string `json:"company"`
 }
 
 type Group_info struct {
