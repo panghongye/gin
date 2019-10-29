@@ -1,13 +1,15 @@
 package controller
 
 import (
+	"gin/lib/jwt"
 	"gin/model/request"
 	"gin/model/response"
 	"gin/model/table"
 	"gin/service"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 var (
@@ -68,9 +70,18 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 	}
 
 	if user.Password == param.Password {
-		res.Success = true
 		user.Password = ""
-		res.UserInfo = user
+		res.Success = true
+		token, err := jwt.Jwt.TokenCreate(user)
+		if err != nil {
+			res.Success = false
+			res.Message = err.Error()
+		}
+		res.UserInfo = struct {
+			table.UserInfo
+			Token string `json:"token"`
+		}{*user, token}
+
 	} else {
 		res.Success = false
 		res.Message = "密码不正确"

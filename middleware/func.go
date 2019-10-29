@@ -1,8 +1,11 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"gin/lib/jwt"
+	"gin/model/response"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Cros(c *gin.Context) {
@@ -16,14 +19,22 @@ func Cros(c *gin.Context) {
 	}
 }
 
+func Auth(c *gin.Context) {
+	t, err := jwt.Jwt.TokenParse(c.Query("token"))
+	log.Println(t)
+	if err != nil {
+		SendErr(err, c)
+	}
+}
+
 // 有错时 返回 true
 func SendErr(err error, c *gin.Context) bool {
 	if err == nil {
 		return false
 	}
 	log.Println("SendErr ", err)
-	c.JSON(400, gin.H{
-		"err": err.Error(),
+	c.JSON(200, response.Response{
+		Message: err.Error(),
 	})
 	c.Abort()
 	return true

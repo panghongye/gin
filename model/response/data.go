@@ -1,5 +1,7 @@
 package response
 
+import "gin/model/table"
+
 // 响应码
 type Response struct {
 	Code     int32       `json:"code"`
@@ -7,7 +9,10 @@ type Response struct {
 	Msg      string      `json:"msg"`
 	Success  bool        `json:"success"`
 	Data     interface{} `json:"data"`
-	UserInfo interface{} `json:"userInfo"`
+	UserInfo struct {
+		table.UserInfo
+		Token string `json:"token"`
+	} `json:"userInfo"`
 }
 
 // 分页数据
