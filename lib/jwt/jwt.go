@@ -1,38 +1,47 @@
 package jwt
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-// var Jwt *tk
+var Jwt *tk
+
+type PlayLoad map[string]interface{}
+type Claims struct {
+	PlayLoad `json:"playLoad"`
+	jwt.StandardClaims
+}
 
 type tk struct {
 	secret    []byte
-	expiresAt int64
+	expiresAt time.Duration
 }
 
-func (this *tk) TokenCreate(playLoad interface{}) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{ // jwt.StandardClaims
-		"exp":      this.expiresAt + time.Now().UnixNano(),
-		"playLoad": playLoad,
-	})
-	tokenString, err := token.SignedString(this.secret)
-	return tokenString, err
+func (this tk) TokenCreate(playLoad PlayLoad) (string, error) {
+	claims := Claims{
+		playLoad,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(this.expiresAt).Unix(),
+		},
+	}
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return tokenClaims.SignedString(this.secret)
 }
 
-func (this *tk) TokenParse(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+func (this tk) TokenParse(tokenString string) (*Claims, error) {
+	if tokenString == "" {
+		return nil, errors.New("tokenString 无效")
+	}
+	token, err := jwt.ParseWithClaims(tokenString, new(Claims), func(tokenString *jwt.Token) (interface{}, error) {
 		return this.secret, nil
 	})
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
+	if token != nil {
+		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+			return claims, nil
+		}
 	}
 	return nil, err
 }
@@ -42,11 +51,13 @@ func (this *tk) TokenRefresh(tokenString string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return this.TokenCreate(t["playLoad"])
+	return this.TokenCreate(t.PlayLoad)
 }
 
-// expiresAt/UnixNano
-func New(secret string, expiresAt int64) *tk {
-	Jwt := &tk{[]byte(secret), expiresAt}
+func New(secret string, expiresAt time.Duration) *tk {
+	if Jwt != nil {
+		return Jwt
+	}
+	Jwt = &tk{[]byte(secret), expiresAt}
 	return Jwt
 }

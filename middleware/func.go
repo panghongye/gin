@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"gin/lib/jwt"
 	"gin/model/response"
 	"log"
@@ -20,8 +21,11 @@ func Cros(c *gin.Context) {
 }
 
 func Auth(c *gin.Context) {
-	t, err := jwt.Jwt.TokenParse(c.Query("token"))
-	log.Println(t)
+	token := c.Query("token")
+	if token == "" {
+		SendErr(errors.New("token 无效"), c)
+	}
+	_, err := jwt.Jwt.TokenParse(token)
 	if err != nil {
 		SendErr(err, c)
 	}

@@ -9,6 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.4.0
 	github.com/googollee/go-engine.io v1.4.2
 	github.com/googollee/go-socket.io v1.4.2
+	github.com/graarh/golang-socketio v0.0.0-20170510162725-2c44953b9b5f // indirect
 	github.com/jinzhu/gorm v1.9.11
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.4.0

@@ -72,7 +72,9 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 	if user.Password == param.Password {
 		user.Password = ""
 		res.Success = true
-		token, err := jwt.Jwt.TokenCreate(user)
+		token, err := jwt.Jwt.TokenCreate(jwt.PlayLoad{
+			"user": user,
+		})
 		if err != nil {
 			res.Success = false
 			res.Message = err.Error()
