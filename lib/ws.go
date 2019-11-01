@@ -23,6 +23,7 @@ func GetWs() *socketio.Server {
 
 	server.OnError("/", func(e error) {
 		log.Println("error:", e)
+		log.Println()
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
