@@ -4,16 +4,16 @@ import (
 	"gin/service"
 	"log"
 	"strings"
+	"time"
 
-	// engineio "github.com/googollee/go-engine.io"
+	engineio "github.com/googollee/go-engine.io"
 	socketio "github.com/googollee/go-socket.io"
 )
 
 var userService service.UserService
 
 func GetWs() *socketio.Server {
-	// server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, 0, nil, nil})
-	server, err := socketio.NewServer(nil)
+	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Minute, nil, nil})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +24,9 @@ func GetWs() *socketio.Server {
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
-		s.Close()
+		// s.Close()
+		log.Println("OnDisconnect", s.URL())
+		log.Println()
 	})
 
 	server.OnConnect("/", func(s socketio.Conn) error {
