@@ -13,7 +13,7 @@ import (
 var userService service.UserService
 
 func GetWs() *socketio.Server {
-	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Minute, nil, nil})
+	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Second, nil, nil})
 	if err != nil {
 		log.Fatal(err)
 	}
