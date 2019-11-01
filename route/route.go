@@ -16,7 +16,7 @@ var (
 
 func BuildRouter() *gin.Engine {
 	jwt.New("0", time.Hour*100)
-	router := gin.Default()
+	router := gin.New()
 	router.Use(middleware.Cros)
 	{
 		v1 := router.Group("/api/v1")
@@ -29,8 +29,9 @@ func BuildRouter() *gin.Engine {
 		v1.POST("/login", userCtrl.Login)
 		v1.POST("/github_oauth")
 		v1.POST("/register", userCtrl.Register)
-		ws := lib.GetWs()
-		router.Any("/socket.io/*any", middleware.Auth, gin.WrapH(ws))
+		ws := lib.GetWs2()
+		// router.Any("/socket.io/*any", middleware.Auth, gin.WrapH(ws))
+		router.Any("/socket.io/*any", gin.WrapH(ws))
 	}
 	return router
 }
