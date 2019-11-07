@@ -1,0 +1,3 @@
+server:
+  name: app
+  addr: ":3000"

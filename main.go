@@ -1,13 +1,14 @@
 package main
 
 import (
-	"gin/conf"
+	_ "gin/conf"
 	"gin/route"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	logrus.Info("【启动】")
-	route.BuildRouter().Run(conf.Port)
+	logrus.Info("[start]")
+	route.BuildRouter().Run(viper.GetString("server.addr"))
 }
