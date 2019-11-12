@@ -1,10 +1,10 @@
 # socketio
 
-[socket.io](https://socket.io/)/[engine.io](https://github.com/socketio/engine.io) implementation in Go
+[socket.io](https://socket.io/)/[engine.io](https://github.com/gin/socketio/engine.io) implementation in Go
 
 [![GoDoc](https://godoc.org/socketio?status.svg)](https://godoc.org/socketio)
 [![Go Report Card](https://goreportcard.com/badge/socketio)](https://goreportcard.com/report/socketio)
-[![license](https://img.shields.io/badge/license-New%20BSD-ff69b4.svg)](https://socketio/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/license-New%20BSD-ff69b4.svg)](https://gin/socketio/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/zyxar/socketio.svg?branch=master)](https://travis-ci.org/zyxar/socketio)
 
 
@@ -219,7 +219,7 @@ ditto.emit('disguise', 'pidgey', new ArrayBuffer(8));
 
 ## Parser
 
-The `encoder` and `decoder` provided by `socketio.DefaultParser` is compatible with [`socket.io-parser`](https://github.com/socketio/socket.io-parser/), complying with revision 4 of [socket.io-protocol](https://github.com/socketio/socket.io-protocol).
+The `encoder` and `decoder` provided by `socketio.DefaultParser` is compatible with [`socket.io-parser`](https://github.com/gin/socketio/socket.io-parser/), complying with revision 4 of [socket.io-protocol](https://github.com/gin/socketio/socket.io-protocol).
 
 An `Event` or `Ack` Packet with any data satisfying `socketio.Binary` interface (e.g. `socketio.Bytes`) would be encoded as `BinaryEvent` or `BinaryAck` Packet respectively.
 

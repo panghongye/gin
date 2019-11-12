@@ -1,14 +1,14 @@
 # engine
 
-[![GoDoc](https://godoc.org/socketio/engine?status.svg)](https://godoc.org/socketio/engine)
-[![license](https://img.shields.io/badge/license-New%20BSD-ff69b4.svg)](https://socketio/blob/master/LICENSE)
+[![GoDoc](https://godoc.org/gin/socketio/engine?status.svg)](https://godoc.org/gin/socketio/engine)
+[![license](https://img.shields.io/badge/license-New%20BSD-ff69b4.svg)](https://gin/socketio/blob/master/LICENSE)
 
-[engine.io](https://github.com/socketio/engine.io) in #Go
+[engine.io](https://github.com/gin/socketio/engine.io) in #Go
 
 ## Install
 
 ```shell
-vgo get -v socketio/engine
+vgo get -v gin/socketio/engine
 ```
 
 ## Example
@@ -23,7 +23,7 @@ import (
 	"os"
 	"time"
 
-	"socketio/engine"
+	"gin/socketio/engine"
 )
 
 func main() {

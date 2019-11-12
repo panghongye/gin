@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"sync"
 
-	"socketio/engine"
+	"gin/socketio/engine"
 )
 
 var (

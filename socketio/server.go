@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"socketio/engine"
+	"gin/socketio/engine"
 )
 
 // Server is socket.io server implementation
