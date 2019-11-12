@@ -7,11 +7,11 @@ import (
 	"github.com/zyxar/socketio"
 )
 
-func GetWsx() *socketio.Server {
+func GetWs3() *socketio.Server {
 	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
 	server.Namespace("/").
 		OnConnect(func(so socketio.Socket) {
-			log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+			log.Println("connected:", so.RemoteAddr(), so.LocalAddr(), so.Sid(), so.Namespace())
 		}).
 		OnDisconnect(func(so socketio.Socket) {
 			log.Printf("%v %v %q disconnected", so.Sid(), so.RemoteAddr(), so.Namespace())
@@ -21,8 +21,9 @@ func GetWsx() *socketio.Server {
 			log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
 			log.Println(err)
 		}).
-		OnEvent("initSocket", func(so socketio.Socket, data string) {
+		OnEvent("initSocket", func(so socketio.Socket, data uint) {
 			log.Println(data)
+			so.Emit("initSocket", "xx?")
 		})
 	return server
 }
