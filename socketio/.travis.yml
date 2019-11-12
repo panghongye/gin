@@ -1,0 +1,17 @@
+sudo: false
+language: go
+go:
+- "1.11.x"
+- master
+
+install: true
+
+script:
+  - make test -C ./engine
+  - make test
+
+notifications:
+  email: false
+
+env:
+  - GO111MODULE=on
