@@ -17,6 +17,7 @@ var (
 func BuildRouter() *gin.Engine {
 	jwt.New("0", time.Hour*100)
 	router := gin.New()
+	router.Static("/assets", "./assets")
 	router.Use(middleware.Cros)
 	{
 		v1 := router.Group("/api/v1")

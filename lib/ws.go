@@ -55,7 +55,7 @@ func GetWs() *socketio.Server {
 	})
 
 	server.OnEvent("/", "initGroupChat", func(s socketio.Conn, userID int) {
-		server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
+		// server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
 		t := userService.GetByID(userID)
 		socketId := s.ID()
 		if t.Socketid != "" {
