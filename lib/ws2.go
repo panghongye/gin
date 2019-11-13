@@ -53,44 +53,9 @@ func GetWs2() *socketio.Server {
 			}
 			so.Emit("initSocket success")
 		})
-
-		so.On("initGroupChat", func(userID int) {
-			t := userService.GetByID(userID)
-			socketId := so.Id()
-			if t.Socketid != "" {
-				socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-			}
-			if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-				so.Emit("error", map[string]interface{}{
-					"code": 500, "message": err.Error(),
-				})
-				return
-			}
-			so.Emit("initSocket success")
-		})
-
-		so.On("initMessage", func() {
-			so.Emit("initMessage")
-		})
-
-		so.On("sendGroupMsg", func() {
-			so.Emit("sendGroupMsg")
-		})
-
-		so.On("joinGroup", func() {
-			so.Emit("joinGroup")
-		})
-
-		so.On("sendPrivateMsg", func() {
-			so.Emit("sendPrivateMsg")
-		})
-
-		so.On("addAsTheContact", func() {
-			so.Emit("addAsTheContact")
-		})
-
-		so.On("robotChat", func() {
-			so.Emit("robotChat")
+		so.On("test", func() {
+			so.Join("")
+			so.BroadcastTo("", "")
 		})
 
 	})
