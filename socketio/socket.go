@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"sync"
 
-	"gin/socketio/engine"
+	"github.com/zyxar/socketio/engine"
 )
 
 var (
@@ -26,29 +26,13 @@ type Socket interface {
 	Sid() string
 	io.Closer
 
-	Rooms() []string         // Rooms returns the rooms name joined now.
-	Join(room string) error  // Join joins the room.
-	Leave(room string) error // Leave leaves the room.
-	BroadcastToRoom(room, event string, args ...interface{}) error
+	Join(room string)
+	Leave(room string)
 }
 
 type nspSock struct {
 	*socket
-	name  string
-	rooms map[string]map[string]struct{}
-}
-
-func (n *nspSock) Rooms() []string { return []string{} }
-func (n *nspSock) Join(room string) error {
-	n.rooms[room][n.Sid()] = struct{}{}
-	return nil
-}
-func (n *nspSock) Leave(room string) error {
-	delete(n.rooms[room], n.Sid())
-	return nil 
-}
-func (n *nspSock) BroadcastToRoom(room, event string, args ...interface{}) error {
-	return n.Emit(event, args)
+	name string
 }
 
 // Namespace implements Socket.Namespace

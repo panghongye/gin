@@ -18,7 +18,7 @@ func GetWs2() *socketio.Server {
 
 	server.On("error", func(so socketio.Socket, err error) {
 		fmt.Printf("Error: %s, %s\n", err, godebug.LF())
-		// so.BroadcastTo()
+		so.BroadcastTo("", "")
 	})
 
 	server.OnAny(func(arg ...interface{}) {
