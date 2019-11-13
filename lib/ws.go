@@ -19,23 +19,7 @@ func GetWs() *socketio.Server {
 		log.Fatal(err)
 	}
 
-	server.OnError("/", func(e error) {
-		log.Println("?????????????????:", e.Error())
-		log.Println()
-	})
-
-	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
-		// s.Close()
-		log.Println("OnDisconnect", s.URL())
-		log.Println()
-	})
-
-	server.OnConnect("/", func(s socketio.Conn) error {
-		return nil
-	})
-
 	server.OnEvent("/", "initSocket", func(s socketio.Conn, userID int) {
-		server.BroadcastToRoom("room1", "chat message", s.ID())
 		t := userService.GetByID(userID)
 		socketId := s.ID()
 		if t.Socketid != "" {
@@ -55,23 +39,7 @@ func GetWs() *socketio.Server {
 	})
 
 	server.OnEvent("/", "initGroupChat", func(s socketio.Conn, userID int) {
-		// server.BroadcastToRoom("room1", "chat message", s.ID()+" : "+msg)
-		t := userService.GetByID(userID)
-		socketId := s.ID()
-		if t.Socketid != "" {
-			socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-		}
-		if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-			s.Emit("error", struct {
-				Code    int
-				Message string
-			}{
-				500,
-				result.Error.Error(),
-			})
-			return
-		}
-		s.Emit("initSocket success")
+		s.Emit("initGroupChat success")
 	})
 
 	go server.Serve()
