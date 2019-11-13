@@ -40,6 +40,12 @@ func GetWs() *socketio.Server {
 
 	server.OnEvent("/", "initGroupChat", func(s socketio.Conn, userID int) {
 		s.Emit("initGroupChat success")
+		// server.BroadcastToRoom("")
+	})
+
+	server.OnEvent("/", "test", func(s socketio.Conn, userID int) {
+		s.Join("")
+		server.BroadcastToRoom("", "")
 	})
 
 	go server.Serve()

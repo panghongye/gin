@@ -1,6 +1,7 @@
 package socketio
 
 import (
+	"log"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -11,7 +12,10 @@ type namespace struct {
 	onConnect    func(so Socket)
 	onDisconnect func(so Socket)
 	onError      func(so Socket, err ...interface{})
-	rooms        map[string]map[string]*socket
+	rooms        struct {
+		value map[string]map[string]*socket
+		sync.RWMutex
+	}
 }
 
 // Namespace is socket.io `namespace` abstraction
@@ -34,9 +38,11 @@ type Namespace interface {
 }
 
 func (e *namespace) BroadcastToRoom(room string, event string, args ...interface{}) {
-	for sid := range e.rooms[room] {
-		so := *e.rooms[room][sid]
-		so.Emit(event, args)
+	for sid := range e.rooms.value[room] {
+		so := *e.rooms.value[room][sid]
+		if err := so.Emit(event, args); err != nil {
+			log.Println("[BroadcastToRoom]", room, event, args, err)
+		}
 	}
 }
 

@@ -10,5 +10,7 @@ import (
 
 func main() {
 	logrus.Info("[start]")
-	route.BuildRouter().Run(viper.GetString("server.addr"))
+	if err := route.BuildRouter().Run(viper.GetString("server.addr")); err != nil {
+		panic(err)
+	}
 }
