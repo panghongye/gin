@@ -1,0 +1,22 @@
+# 认证
+auth:
+  # token有效期, 已小时为单位, 7 * 24
+  duration: 168
+  secretKey: secretKey
+
+# database
+db:
+  type: mysql
+  connStr: root:rootroot@tcp(127.0.0.1)/dbName?charset=utf8mb4&parseTime=True&loc=Local
+  maxIdleConn: 10
+  maxOpenConn: 100
+
+# redis
+redis:
+  addr: 127.0.0.1:7788
+  password: 
+  db: 1
+
+# 业务配置
+app:
+
