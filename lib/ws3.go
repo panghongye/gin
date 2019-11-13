@@ -45,7 +45,6 @@ func GetWs3() *socketio.Server {
 
 	// assets
 	{
-		sp := server.Namespace("assets")
 		sp.OnConnect(func(so socketio.Socket) {
 			so.Join("a")
 			log.Println("OnConnect <<", so.Sid())
