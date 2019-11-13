@@ -54,6 +54,22 @@ type socket struct {
 	decoder Decoder
 	acks    map[string]*ackHandle
 	mutex   sync.RWMutex
+	nsp     *namespace
+}
+
+func (s *socket) Join(room string) {
+	nsp := s.nsp
+	if nsp.rooms == nil {
+		nsp.rooms = map[string]map[string]*socket{}
+	}
+	if nsp.rooms[room] == nil {
+		nsp.rooms[room] = map[string]*socket{}
+	}
+	nsp.rooms[room][s.Sid()] = s
+}
+
+func (s *socket) Leave(room string) {
+	delete(s.nsp.rooms[room], s.Sid())
 }
 
 func newSocket(ß *engine.Socket, parser Parser) *socket {
@@ -66,6 +82,12 @@ func newSocket(ß *engine.Socket, parser Parser) *socket {
 }
 
 func (s *socket) attachnsp(nsp string) {
+	s.mutex.Lock()
+	s.acks[nsp] = &ackHandle{ackmap: make(map[uint64]*callback)}
+	s.mutex.Unlock()
+}
+
+func (s *socket) getnsp1(nsp string) {
 	s.mutex.Lock()
 	s.acks[nsp] = &ackHandle{ackmap: make(map[uint64]*callback)}
 	s.mutex.Unlock()

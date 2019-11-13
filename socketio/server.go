@@ -23,6 +23,7 @@ func NewServer(interval, timeout time.Duration, parser Parser) (server *Server, 
 		socket := newSocket(ß, parser)
 		socket.attachnsp("/")
 		nsp := server.creatensp("/")
+		socket.nsp = nsp
 		if err := socket.emitPacket(&Packet{
 			Type:      PacketTypeConnect,
 			Namespace: "/",

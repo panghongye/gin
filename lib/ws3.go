@@ -9,18 +9,19 @@ import (
 
 func GetWs3() *socketio.Server {
 	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
-	server.Namespace("/").
-		OnConnect(func(so socketio.Socket) {
-			so.Join("a")
-			log.Println("connected:", so.RemoteAddr(), so.LocalAddr(), so.Sid(), so.Namespace())
-		}).
+	sp := server.Namespace("/")
+	sp.OnConnect(func(so socketio.Socket) {
+		so.Join("a")
+		log.Println("OnConnect <<", so.Sid())
+	}).
 		OnDisconnect(func(so socketio.Socket) {
-			log.Printf("%v %v %q disconnected", so.Sid(), so.RemoteAddr(), so.Namespace())
+			log.Println("OnDisconnect <<", so.Sid())
 			so.Close()
 		}).
 		OnError(func(so socketio.Socket, err ...interface{}) {
-			log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
+			log.Println("OnError <<", so.Sid())
 			log.Println(err)
+			so.Close()
 		}).
 		OnEvent("initSocket", func(so socketio.Socket, data uint) {
 			log.Println(data)
@@ -28,8 +29,7 @@ func GetWs3() *socketio.Server {
 		}).
 		OnEvent("chat message", func(so socketio.Socket, data string) {
 			log.Println(data)
-			// so.Emit("chat message", data+">>")
-			so.BroadcastToRoom("a", data)
+			sp.BroadcastToRoom("a", "chat message", data)
 		})
 
 	return server

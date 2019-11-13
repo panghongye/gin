@@ -1,13 +1,10 @@
 package lib
 
 import (
-	"fmt"
-	"log"
-
-	"strings"
-
 	"github.com/pschlump/godebug"
 	"github.com/pschlump/socketio"
+	"log"
+	"strings"
 )
 
 func GetWs2() *socketio.Server {
@@ -17,29 +14,29 @@ func GetWs2() *socketio.Server {
 	}
 
 	server.On("error", func(so socketio.Socket, err error) {
-		fmt.Printf("Error: %s, %s\n", err, godebug.LF())
+		log.Printf("Error: %s, %s\n", err, godebug.LF())
 		so.BroadcastTo("", "")
 	})
 
 	server.OnAny(func(arg ...interface{}) {
-		fmt.Println(arg)
-		fmt.Println()
+		log.Println(arg)
+		log.Println()
 	})
 
 	server.On("connection", func(so socketio.Socket) {
 
 		so.On("error", func(msg string) {
-			fmt.Println("[error]", msg)
-			fmt.Println()
+			log.Println("[error]", msg)
+			log.Println()
 		})
 
 		so.On("disconnect", func(msg string) {
-			fmt.Println("【disconnect】", msg)
+			log.Println("【disconnect】", msg)
 		})
 
 		so.OnAny(func(arg ...interface{}) {
-			fmt.Println(arg)
-			fmt.Println()
+			log.Println(arg)
+			log.Println()
 		})
 
 		so.On("initSocket", func(userID int) {
