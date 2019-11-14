@@ -19,36 +19,41 @@ func GetWs3() *socketio.Server {
 			log.Println("OnError <<", so.Sid())
 			log.Println(err)
 			so.Close()
-		}).OnDisconnect(func(so socketio.Socket) {
-		log.Println("OnDisconnect <<", so.Sid())
-		so.Close()
-	}).OnEvent("initSocket", func(s socketio.Socket, userID int) {
-		t := userService.GetByID(userID)
-		socketId := s.Sid()
-		if t.Socketid != "" {
-			socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-		}
-		if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-			s.Emit("error", struct {
-				Code    int
-				Message string
-			}{
-				500,
-				result.Error.Error(),
-			})
-			return
-		}
-		s.Emit("initSocket success", "XXX")
-	}).OnEvent("initGroupChat", func(s socketio.Socket, userID int) {
-		s.Emit("initGroupChat success")
-	})
+		}).
+		OnDisconnect(func(so socketio.Socket) {
+			log.Println("OnDisconnect <<", so.Sid())
+			so.Close()
+		}).
+		OnEvent("initSocket", func(s socketio.Socket, userID int) {
+			t := userService.GetByID(userID)
+			socketId := s.Sid()
+			if t.Socketid != "" {
+				socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
+			}
+			if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
+				s.Emit("error", struct {
+					Code    int
+					Message string
+				}{
+					500,
+					result.Error.Error(),
+				})
+				return
+			}
+			s.Emit("initSocket success", "XXX")
+		}).
+		OnEvent("initGroupChat", func(s socketio.Socket, userID int) {
+			s.Emit("initGroupChat success")
+		})
 
 	// assets
 	{
-		sp.OnConnect(func(so socketio.Socket) {
-			so.Join("a")
-			log.Println("OnConnect <<", so.Sid())
-		}).
+		// sp := server.Namespace("/test")
+		sp.
+			OnConnect(func(so socketio.Socket) {
+				so.Join("a")
+				log.Println("OnConnect <<", so.Sid())
+			}).
 			OnEvent("chat message", func(so socketio.Socket, data string) {
 				log.Println("chat message:", data)
 				sp.BroadcastToRoom("a", "chat message", so.Sid()+":"+data)
