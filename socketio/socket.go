@@ -58,22 +58,23 @@ type socket struct {
 }
 
 func (s *socket) Join(room string) {
-	nsp := s.nsp
-	nsp.rooms.Lock()
-	if nsp.rooms.value == nil {
-		nsp.rooms.value = map[string]map[string]*socket{}
+	rooms := &s.nsp.rooms
+	rooms.Lock()
+	if rooms.value == nil {
+		rooms.value = map[string]map[string]*socket{}
 	}
-	if nsp.rooms.value[room] == nil {
-		nsp.rooms.value[room] = map[string]*socket{}
+	if rooms.value[room] == nil {
+		rooms.value[room] = map[string]*socket{}
 	}
-	nsp.rooms.value[room][s.Sid()] = s
-	nsp.rooms.Unlock()
+	rooms.value[room][s.Sid()] = s
+	rooms.Unlock()
 }
 
 func (s *socket) Leave(room string) {
-	s.nsp.rooms.Lock()
-	delete(s.nsp.rooms.value[room], s.Sid())
-	s.nsp.rooms.Unlock()
+	rooms := &s.nsp.rooms
+	rooms.Lock()
+	delete(rooms.value[room], s.Sid())
+	rooms.Unlock()
 }
 
 func newSocket(ß *engine.Socket, parser Parser) *socket {
