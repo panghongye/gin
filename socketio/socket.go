@@ -58,7 +58,7 @@ type socket struct {
 }
 
 func (s *socket) Join(room string) {
-	rooms := s.server.rooms
+	rooms := &s.server.rooms
 	rooms.Lock()
 	if rooms.value == nil {
 		rooms.value = map[string]map[string]*socket{}
@@ -71,7 +71,7 @@ func (s *socket) Join(room string) {
 }
 
 func (s *socket) Leave(room string) {
-	rooms := s.server.rooms
+	rooms := &s.server.rooms
 	rooms.Lock()
 	delete(rooms.value[room], s.Sid())
 	rooms.Unlock()
@@ -136,7 +136,7 @@ func (s *socket) fireAck(nsp string, id uint64, data []byte, buffer [][]byte, au
 
 // Emit implements Socket.Emit
 func (s *socket) Emit(event string, args ...interface{}) (err error) {
-	return s.emit("/", event, args...)
+	return s.emit(s.getnsp1(), event, args...)
 }
 
 // EmitError implements Socket.EmitError
