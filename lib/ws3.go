@@ -13,8 +13,7 @@ func GetWs3() *socketio.Server {
 	server.OnError(func(err error) {
 		log.Panicln("server.OnError", err)
 	})
-	sp := server.Namespace("/")
-	sp.
+	server.Namespace("/").
 		OnError(func(so socketio.Socket, err ...interface{}) {
 			log.Println("OnError <<", so.Sid())
 			log.Println(err)
@@ -48,15 +47,15 @@ func GetWs3() *socketio.Server {
 
 	// assets
 	{
-		// sp := server.Namespace("/test")
-		sp.
+		server.Namespace("/test").
 			OnConnect(func(so socketio.Socket) {
 				so.Join("a")
+				so.Namespace()
 				log.Println("OnConnect <<", so.Sid())
 			}).
 			OnEvent("chat message", func(so socketio.Socket, data string) {
 				log.Println("chat message:", data)
-				sp.BroadcastToRoom("a", "chat message", so.Sid()+":"+data)
+				so.BroadcastToRoom("a", "chat message", so.Sid()+":"+data)
 			})
 	}
 

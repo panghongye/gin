@@ -61,7 +61,7 @@
   <script src="//socket-io-chat.now.sh/socket.io/socket.io.js"></script>
   <script src="//code.jquery.com/jquery-1.11.1.js"></script>
   <script>
-    var socket = io('/');
+    var socket = io('/test');
     $('form').submit(function (e) {
       e.preventDefault(); // prevents page reloading
       socket.emit('chat message', $('#m').val());
@@ -69,6 +69,7 @@
       return false;
     });
     socket.on('chat message', function (msg) {
+      console.log(msg)
       $('#messages').append($('<li>').text(msg));
     });
   </script>

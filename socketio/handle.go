@@ -1,7 +1,6 @@
 package socketio
 
 import (
-	"log"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -12,10 +11,6 @@ type namespace struct {
 	onConnect    func(so Socket)
 	onDisconnect func(so Socket)
 	onError      func(so Socket, err ...interface{})
-	rooms        struct {
-		value map[string]map[string]*socket
-		sync.RWMutex
-	}
 }
 
 // Namespace is socket.io `namespace` abstraction
@@ -34,16 +29,6 @@ type Namespace interface {
 	OnDisconnect(fn func(so Socket)) Namespace // chainable
 	// OnError registers fn as callback, which would be called when error occurs in this Namespace
 	OnError(fn func(so Socket, err ...interface{})) Namespace // chainable
-	BroadcastToRoom(room string, event string, args ...interface{})
-}
-
-func (e *namespace) BroadcastToRoom(room string, event string, args ...interface{}) {
-	for sid := range e.rooms.value[room] {
-		so := *e.rooms.value[room][sid]
-		if err := so.Emit(event, args); err != nil {
-			log.Println("[BroadcastToRoom]", room, event, args, err)
-		}
-	}
 }
 
 func (e *namespace) OnDisconnect(fn func(so Socket)) Namespace { e.onDisconnect = fn; return e }
