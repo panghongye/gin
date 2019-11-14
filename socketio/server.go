@@ -16,10 +16,7 @@ type Server struct {
 	sockLock sync.RWMutex
 	onError  func(err error)
 	nsps     map[string]*namespace
-	rooms    struct {
-		value map[string]map[string]*socket
-		sync.RWMutex
-	}
+	rooms    map[string]map[string]*socket
 }
 
 // NewServer creates a socket.io server instance upon underlying engine.io transport
@@ -114,6 +111,7 @@ func (s *Server) OnError(fn func(err error)) { s.onError = fn }
 
 // process is the Packet process handle on server side
 func (s *Server) process(sock *socket, p *Packet) {
+	sock.namespace = p.Namespace
 	nsp, ok := s.getnsp(p.Namespace)
 	if !ok {
 		if p.Type > PacketTypeDisconnect {
@@ -196,8 +194,8 @@ func (s *Server) process(sock *socket, p *Packet) {
 }
 
 func (s *Server) BroadcastToRoom(room string, event string, args ...interface{}) {
-	for sid := range s.rooms.value[room] {
-		so := s.rooms.value[room][sid]
+	for sid := range s.rooms[room] {
+		so := s.rooms[room][sid]
 		if err := so.Emit(event, args); err != nil {
 			log.Println("[BroadcastToRoom]", room, event, args, err)
 		}
