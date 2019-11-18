@@ -1,10 +1,10 @@
 package lib
 
 import (
+	"log"
+
 	"github.com/pschlump/godebug"
 	"github.com/pschlump/socketio"
-	"log"
-	"strings"
 )
 
 func GetWs2() *socketio.Server {
@@ -37,21 +37,6 @@ func GetWs2() *socketio.Server {
 		so.OnAny(func(arg ...interface{}) {
 			log.Println(arg)
 			log.Println()
-		})
-
-		so.On("initSocket", func(userID int) {
-			t := userService.GetByID(userID)
-			socketId := so.Id()
-			if t.Socketid != "" {
-				socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-			}
-			if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-				so.Emit("error", map[string]interface{}{
-					"code": 500, "message": err.Error(),
-				})
-				return
-			}
-			so.Emit("initSocket success")
 		})
 		so.On("test", func() {
 			so.Join("")

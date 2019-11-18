@@ -1,63 +1,30 @@
 package lib
 
 import (
-	"gin/socketio"
 	"log"
-	"strings"
 	"time"
-	//  "github.com/zyxar/socketio"
+
+	engineio "github.com/googollee/go-engine.io"
+	socketio "github.com/googollee/go-socket.io"
+	// socketio "github.com/mrfoe7/go-socket.io"
 )
 
 func GetWs3() *socketio.Server {
-	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
-	server.OnError(func(err error) {
-		log.Panicln("server.OnError", err)
-	})
-	server.Namespace("/").
-		OnError(func(so socketio.Socket, err ...interface{}) {
-			log.Println("OnError <<", so.Sid())
-			log.Println(err)
-			so.Close()
-		}).
-		OnDisconnect(func(so socketio.Socket) {
-			log.Println("OnDisconnect <<", so.Sid())
-			so.Close()
-		}).
-		OnEvent("initSocket", func(s socketio.Socket, userID int) {
-			t := userService.GetByID(userID)
-			socketId := s.Sid()
-			if t.Socketid != "" {
-				socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-			}
-			if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-				s.Emit("error", struct {
-					Code    int
-					Message string
-				}{
-					500,
-					result.Error.Error(),
-				})
-				return
-			}
-			s.Emit("initSocket success", "XXX")
-		}).
-		OnEvent("initGroupChat", func(s socketio.Socket, userID int) {
-			s.Emit("initGroupChat success")
-		})
-
-	// assets
-	{
-		server.Namespace("/test").
-			OnConnect(func(so socketio.Socket) {
-				so.Join("a")
-				so.Namespace()
-				log.Println("OnConnect <<", so.Sid())
-			}).
-			OnEvent("chat message", func(so socketio.Socket, data string) {
-				log.Println("chat message:", data)
-				so.BroadcastToRoom("a", "chat message", so.Sid()+":"+data)
-			})
+	server, err := socketio.NewServer(&engineio.Options{nil, nil, time.Hour, time.Second, nil, nil})
+	if err != nil {
+		log.Fatal(err)
 	}
 
+	server.OnEvent("/", "initGroupChat", func(s socketio.Conn, userID int) {
+		s.Emit("initGroupChat success")
+		// server.BroadcastToRoom("")
+	})
+
+	server.OnEvent("/", "test", func(s socketio.Conn, userID int) {
+		s.Join("")
+		server.BroadcastToRoom("", "")
+	})
+
+	go server.Serve()
 	return server
 }

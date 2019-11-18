@@ -15,7 +15,6 @@ var (
 	ResCodeLoginDisabled        = &ResCode{Code: 502, Msg: "系统暂停登录"}
 	ResCodeRegisterDisabled     = &ResCode{Code: 503, Msg: "系统暂停注册"}
 	ResCodeGetLockKeyError      = &ResCode{Code: 601, Msg: "获取分布式锁异常"}
-	ResCodeOnHolidayError       = &ResCode{Code: 602, Msg: "放假中无法操作"}
 	ResCodeCommitError          = &ResCode{Code: 701, Msg: "提交异常"}
 	ResCodeRequestTooFrequently = &ResCode{Code: 702, Msg: "请求过于频繁"}
 )
