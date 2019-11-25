@@ -11,6 +11,7 @@ require (
 	github.com/googollee/go-socket.io v1.4.2
 	github.com/gorilla/websocket v1.4.1
 	github.com/jinzhu/gorm v1.9.11
+	github.com/kirinlabs/HttpRequest v0.1.5
 	github.com/lestrrat-go/file-rotatelogs v2.2.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.0 // indirect
 	github.com/pschlump/MiscLib v1.0.0 // indirect
