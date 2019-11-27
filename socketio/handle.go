@@ -33,6 +33,7 @@ type Namespace interface {
 
 func (e *namespace) OnDisconnect(fn func(so Socket)) Namespace { e.onDisconnect = fn; return e }
 func (e *namespace) OnConnect(fn func(so Socket)) Namespace    { e.onConnect = fn; return e }
+
 func (e *namespace) OnError(fn func(so Socket, err ...interface{})) Namespace {
 	e.onError = fn
 	return e
