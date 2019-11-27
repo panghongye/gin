@@ -2,44 +2,37 @@ package service
 
 import (
 	"gin/model/table"
-
 	"github.com/jinzhu/gorm"
 )
 
 type UserService struct{}
 
-// 模糊匹配用户
 func (this UserService) FuzzyMatchUsers(name string) *table.UserInfo {
 	t := new(table.UserInfo)
 	db.Where("name LIKE ?", name).Find(t)
 	return t
 }
 
-// 新增用户
 func (this UserService) InsertData(user *table.UserInfo) *table.UserInfo {
 	db.Create(user)
 	return user
 }
 
-// 添加github用户
 func (UserService) InsertGithubData(name, github_id, avatar, location, website, github, intro, company string) *gorm.DB {
 	var _sql = `insert into user_info(name, github_id, avatar, location, website, github, intro, company) values(?,?,?,?,?,?,?,?);`
 	return db.Raw(_sql, name, github_id, avatar, location, website, github, intro, company)
 }
 
-// 通过github_id查找 github用户信息
 func (UserService) FindGithubUser(githubId string) *gorm.DB {
 	var _sql = `SELECT * FROM user_info WHERE github_id = ? ;`
 	return db.Raw(_sql, githubId)
 }
 
-// 更新 github 用户信息
 func (UserService) UpdateGithubUser(name, avatar, location, website, github, intro, github_id, company string) *gorm.DB {
 	var _sql = ` UPDATE  user_info SET name = ?,avatar = ?,location = ?,website = ?,github = ?,intro= ?, company = ? WHERE github_id = ? ; `
 	return db.Raw(_sql, name, avatar, location, website, github, intro, company, github_id)
 }
 
-// 通过用户名查用户
 func (this UserService) FindDataByName(name string) *table.UserInfo {
 	t := new(table.UserInfo)
 	db.Where("name = ?", name).First(t)
@@ -47,7 +40,7 @@ func (this UserService) FindDataByName(name string) *table.UserInfo {
 }
 
 func (UserService) GetUserInfo(user_id int) *gorm.DB {
-	_sql := `SELECT id AS user_id, name, avatar, location, website, github, github_id, intro, company  FROM user_info   WHERE  user_info.id =? `
+	_sql := `SELECT id AS user_id, name, avatar, location, website, github, github_id, intro, company FROM user_info WHERE user_info.id =? `
 	return db.Raw(_sql, user_id)
 }
 
@@ -70,7 +63,6 @@ func (UserService) DeleteContact(user_id, from_user int) *gorm.DB {
 }
 
 // 通过user_id查找首页群列表
-// TODO： 优化sql语句
 func (UserService) GetGroupList(user_id int) *gorm.DB {
 	var _sql = `SELECT r.to_group_id ,i.name , i.create_time,
       (SELECT g.message  FROM group_msg AS g  WHERE g.to_group_id = r.to_group_id  ORDER BY TIME DESC   LIMIT 1 )  AS message ,
@@ -81,7 +73,6 @@ func (UserService) GetGroupList(user_id int) *gorm.DB {
 }
 
 // 通过user_id查找首页私聊列表
-// TODO： 优化sql语句
 func (UserService) GetPrivateList(user_id int) *gorm.DB {
 	var _sql = ` SELECT r.from_user as user_id, i.name, i.avatar, i.github_id, r.time as be_friend_time,
       (SELECT p.message FROM private_msg AS p WHERE (p.to_user = r.from_user and p.from_user = r.user_id) or (p.from_user = r.from_user and p.to_user = r.user_id) ORDER BY p.time DESC   LIMIT 1 )  AS message ,

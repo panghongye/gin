@@ -18,7 +18,7 @@ var (
 
 type UserCtrl struct{}
 
-// 注册
+
 func (this UserCtrl) Register(ctx *gin.Context) {
 	res := new(response.Response)
 	// 绑定参数
@@ -48,10 +48,8 @@ func (this UserCtrl) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//登录
 func (this UserCtrl) Login(ctx *gin.Context) {
 	res := new(response.Response)
-	// 绑定参数
 	var param request.LoginParam
 	if err := ctx.ShouldBind(&param); err != nil {
 		logrus.Info("登录参数错误: ", err)
@@ -82,9 +80,8 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 		res.UserInfo = struct {
 			table.UserInfo
 			Token   string `json:"token"`
-			User_id int   `json:"user_id"`
-		}{*user, token, user.ID}
-
+			User_id int    `json:"user_id"`
+		}{*user, token, int(user.ID)}
 	} else {
 		res.Success = false
 		res.Message = "密码不正确"

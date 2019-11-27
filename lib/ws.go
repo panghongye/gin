@@ -62,7 +62,6 @@ func GetWs() *socketio.Server {
 			}
 			return "init group chat success"
 		}).
-		// 获取群聊和私聊的数据
 		OnEvent("initMessage", func(so socketio.Socket, obj struct {
 			User_id            int
 			ClientHomePageList []service.ClientHomePage
@@ -70,7 +69,6 @@ func GetWs() *socketio.Server {
 			t := message.GetAllMessage(obj.User_id, obj.ClientHomePageList)
 			return t
 		}).
-		// sendPrivateMsg
 		OnEvent("sendPrivateMsg", func(so socketio.Socket, data struct {
 			From_user   int    `json:"from_user"`
 			To_user     int    `json:"to_user"`
@@ -93,16 +91,15 @@ func GetWs() *socketio.Server {
 			}
 			return data
 		}).
-		// 群聊发信息
 		OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
 			From_user   int    `json:"from_user"`
 			To_group_id string `json:"to_group_id"`
 			Time        int64  `json:"time"`
 			Message     string `json:"message"`
-			Attachments string `json:"attachments"`
+			// Attachments []interface{} `json:"attachments"`
 		}) interface{} {
 			data.Time = time.Now().Unix()
-			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Time, data.Message, data.Attachments)
+			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Time, data.Message, "")
 			so.BroadcastToRoom(data.To_group_id, "getGroupMsg", data)
 			return data
 		}).

@@ -1,6 +1,5 @@
 package syserr
 
-//通用错误
 type CommonErr struct {
 	Label string
 	Log   string

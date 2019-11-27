@@ -1,9 +1,11 @@
 package service
 
+import "gin/model/table"
+
 type Message struct{}
 
 type ClientHomePage struct {
-	Ttachments     string `json:"ttachments"`
+	Attachments    string `json:"attachments"`
 	Avatar         string `json:"avatar"`
 	Be_friend_time int    `json:"be_friend_time"`
 	Github_id      string `json:"github_id"`
@@ -13,7 +15,7 @@ type ClientHomePage struct {
 	Time           int64  `json:"time"`
 	Unread         int    `json:"unread"`
 	User_id        int    `json:"user_id"`
-	To_group_id    string `json:"To_group_id"`
+	To_group_id    string `json:"to_group_id"`
 }
 
 var (
@@ -29,13 +31,24 @@ func (this Message) GetPrivateMsg(toUser, user_id, start, count int) map[string]
 	if start <= 0 {
 		count = 20
 	}
-	var messages = chatService.GetPrivateDetail(user_id, toUser, start-1, count)
-	var userInfo = userService.GetUserInfo(toUser)
+	messages := []struct {
+		Message     string `json:"message"`
+		Attachments string `json:"attachments"`
+		Time        int    `json:"time"`
+		From_user   int    `json:"from_user"`
+		To_group_id string `json:"to_group_id"`
+		Avatar      string `json:"avatar"`
+		Name        string `json:"name"`
+		Github_id   string `json:"github_id"`
+	}{}
+	chatService.GetPrivateDetail(user_id, toUser, start-1, count).Scan(&messages)
+	var userInfo table.UserInfo
+	userService.GetUserInfo(toUser).Scan(&userInfo)
+
 	return map[string]interface{}{
 		"messages": messages,
 		"userInfo": userInfo,
 	}
-
 }
 
 func (this Message) GetGroupItem(groupId string, start, count int) map[string]interface{} {
@@ -46,12 +59,38 @@ func (this Message) GetGroupItem(groupId string, start, count int) map[string]in
 		count = 20
 	}
 
-	var messages = groupChatService.GetGroupMsg(groupId, start-1, count)
+	messages := []struct {
+		Message     string `json:"message"`
+		Attachments string `json:"attachments"`
+		Time        int    `json:"time"`
+		From_user   int    `json:"from_user"`
+		To_group_id string `json:"to_group_id"`
+		Avatar      string `json:"avatar"`
+		Name        string `json:"name"`
+		Github_id   string `json:"github_id"`
+	}{}
+
+	groupChatService.GetGroupMsg(groupId, start-1, count).Scan(&messages)
 	var groupInfo struct {
-		Members interface{} `json:"members"`
+		To_group_id string `json:"to_group_id"`
+		Name        string `json:"name"`
+		Creator_id  int    `json:"creator_id"`
+		Create_time int    `json:"create_time"`
+		Members     []struct {
+			User_id   int    `json:"user_id"`
+			Socketid  string `json:"socketid"`
+			Name      string `json:"name"`
+			Avatar    string `json:"avatar"`
+			Github_id string `json:"github_id"`
+			Github    string `json:"github"`
+			Intro     string `json:"intro"`
+			Company   string `json:"company"`
+			Location  string `json:"location"`
+			Website   string `json:"website"`
+		} `json:"members"`
 	}
-	groupChatService.GetGroupInfo(groupId, ``).Scan(&groupInfo)
-	groupInfo.Members = groupChatService.GetGroupMember(groupId, start-1, count)
+	groupChatService.GetGroupInfo(groupId, "").Scan(&groupInfo)
+	groupChatService.GetGroupMember(groupId, start-1, count).Scan(&groupInfo.Members)
 
 	return map[string]interface{}{
 		"messages":  messages,
@@ -60,10 +99,10 @@ func (this Message) GetGroupItem(groupId string, start, count int) map[string]in
 }
 
 func (this Message) GetAllMessage(user_id int, clientHomePageList []ClientHomePage) map[string]interface{} {
-	var privateList []ClientHomePage
-	var groupList []ClientHomePage
-	privateChat := map[interface{}]interface{}{}
-	groupChat := map[interface{}]interface{}{}
+	privateList := []ClientHomePage{}
+	groupList := []ClientHomePage{}
+	privateChat := []interface{}{}
+	groupChat := []interface{}{}
 	userService.GetPrivateList(user_id).Scan(&privateList)
 	userService.GetGroupList(user_id).Scan(&groupList)
 	homePageList := append(groupList, privateList...)
@@ -82,7 +121,7 @@ func (this Message) GetAllMessage(user_id int, clientHomePageList []ClientHomePa
 		}
 		if goal != nil {
 			sortTime := goal.Time
-			var res = ClientHomePage{}
+			res := ClientHomePage{}
 			if item.User_id != 0 {
 				chatService.GetUnreadCount(sortTime, user_id, item.User_id).Scan(&res)
 			} else {
@@ -92,19 +131,15 @@ func (this Message) GetAllMessage(user_id int, clientHomePageList []ClientHomePa
 		}
 
 		if item.User_id != 0 {
-			// TODO data
-			var data interface{} = this.GetPrivateMsg(item.User_id, user_id, 0, 0)
-			privateChat[item.User_id] = data
+			privateChat = append(privateChat, []interface{}{item.User_id, this.GetPrivateMsg(item.User_id, user_id, 0, 0)})
 		} else if item.To_group_id != "" {
-			var data interface{} = this.GetGroupItem(item.To_group_id, 0, 0)
-			groupChat[item.To_group_id] = data
+			groupChat = append(groupChat, []interface{}{item.To_group_id, this.GetGroupItem(item.To_group_id, 0, 0)})
 		}
-
 	}
 
 	return map[string]interface{}{
 		"homePageList": homePageList,
-		"privateChat":  privateChat,
 		"groupChat":    groupChat,
+		"privateChat":  privateChat,
 	}
 }

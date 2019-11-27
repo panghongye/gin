@@ -4,7 +4,7 @@ import "github.com/jinzhu/gorm"
 
 type UserInfo struct {
 	gorm.Model
-	Github_id int   `json:"github_id"`
+	Github_id int    `json:"github_id"`
 	Name      string `json:"name"`
 	Password  string
 	Avatar    string `json:"avatar"`

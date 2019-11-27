@@ -2,7 +2,6 @@ package response
 
 import "gin/model/table"
 
-// 响应码
 type Response struct {
 	Code     int32       `json:"code"`
 	Message  string      `json:"message"`
@@ -16,7 +15,6 @@ type Response struct {
 	} `json:"userInfo"`
 }
 
-// 分页数据
 type PageData struct {
 	Page     int32       `json:"page"`
 	PageSize int32       `json:"pageSize"`

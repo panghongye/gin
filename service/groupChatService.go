@@ -15,7 +15,7 @@ func (GroupChatService) GetGroupMsg(to_group_id string, start, count int) *gorm.
 
 func (GroupChatService) GetGroupMember(to_group_id string, start, count int) *gorm.DB {
 	sql := `SELECT g.user_id, u.socketid, u.name, u.avatar, u.github_id, u.github, u.intro, u.company, u.location, u.website FROM group_user_relation AS g inner join user_info AS u ON g.user_id = u.id WHERE to_group_id = ?`
-	return db.Raw(sql, to_group_id, start, count)
+	return db.Raw(sql, to_group_id)
 }
 
 func (GroupChatService) GetGroupInfo(to_group_id string, name string) *gorm.DB {

@@ -2,10 +2,6 @@ package service
 
 import "github.com/jinzhu/gorm"
 
-// "gin/model/table"
-
-// "github.com/jinzhu/gorm"
-
 type ChatService struct{}
 
 func (ChatService) GetPrivateDetail(from_user, to_user, start, count int) *gorm.DB {
