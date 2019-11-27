@@ -11,7 +11,6 @@ import (
 
 	"github.com/kirinlabs/HttpRequest"
 	"github.com/sirupsen/logrus"
-	//  "github.com/zyxar/socketio"
 )
 
 var (
