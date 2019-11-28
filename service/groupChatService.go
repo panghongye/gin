@@ -1,6 +1,10 @@
 package service
 
-import "github.com/jinzhu/gorm"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 // "gin/model/table"
 
@@ -22,9 +26,9 @@ func (GroupChatService) GetGroupInfo(to_group_id string, name string) *gorm.DB {
 	return db.Raw(`SELECT to_group_id, name, group_notice, creator_id, create_time FROM group_info  WHERE to_group_id = ? OR name = ? ;`, to_group_id, name)
 }
 
-func (GroupChatService) SaveGroupMsg(from_user int, to_group_id string, time int64, message, attachments string) *gorm.DB {
-	sql := `db.Raw INSERT INTO group_msg(from_user,to_group_id,message ,time, attachments) VALUES(?,?,?,?,?); `
-	return db.Raw(sql, from_user, to_group_id, message, time, attachments)
+func (GroupChatService) SaveGroupMsg(from_user int, to_group_id, message, attachments string) *gorm.DB {
+	sql := `INSERT group_msg(from_user,to_group_id,message ,time, attachments) VALUES(?,?,?,?,?); `
+	return db.Exec(sql, from_user, to_group_id, message, time.Now(), attachments)
 }
 
 func (GroupChatService) AddGroupUserRelation(user_id, groupId int) *gorm.DB {
@@ -32,6 +36,6 @@ func (GroupChatService) AddGroupUserRelation(user_id, groupId int) *gorm.DB {
 	return db.Raw(_sql, groupId, user_id)
 }
 
-func (GroupChatService) GetUnreadCount(sortTime int64, to_group_id string) *gorm.DB {
+func (GroupChatService) GetUnreadCount(sortTime time.Time, to_group_id string) *gorm.DB {
 	return db.Raw(`SELECT count(time) as unread FROM group_msg as p where p.time > ? and p.to_group_id = ?;`, sortTime, to_group_id)
 }

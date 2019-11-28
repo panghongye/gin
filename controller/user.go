@@ -7,6 +7,7 @@ import (
 	"gin/model/table"
 	"gin/service"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -17,7 +18,6 @@ var (
 )
 
 type UserCtrl struct{}
-
 
 func (this UserCtrl) Register(ctx *gin.Context) {
 	res := new(response.Response)
@@ -38,7 +38,7 @@ func (this UserCtrl) Register(ctx *gin.Context) {
 		return
 	}
 
-	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password}); t.ID == 0 {
+	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password, Create_time: time.Now()}); t.ID == 0 {
 		res.Message = "注册失败"
 		res.Success = false
 	} else {

@@ -21,12 +21,6 @@ func BuildRouter() *gin.Engine {
 	router.Use(middleware.Cros)
 	{
 		v1 := router.Group("/api/v1")
-		v1.GET("/alive", func(c *gin.Context) {
-			c.JSON(200, map[string]interface{}{
-				"message": "server alive",
-				"time":    time.Now(),
-			})
-		})
 		v1.POST("/login", userCtrl.Login)
 		v1.POST("/github_oauth")
 		v1.POST("/register", userCtrl.Register)

@@ -91,14 +91,16 @@ func GetWs() *socketio.Server {
 			return data
 		}).
 		OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
-			From_user   int    `json:"from_user"`
-			To_group_id string `json:"to_group_id"`
-			Time        int64  `json:"time"`
-			Message     string `json:"message"`
-			// Attachments []interface{} `json:"attachments"`
+			From_user   int           `json:"from_user"`
+			To_group_id string        `json:"to_group_id"`
+			Time        time.Time     `json:"time"`
+			Message     string        `json:"message"`
+			Name        string        `json:"name"`
+			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
-			data.Time = time.Now().Unix()
-			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Time, data.Message, "")
+			data.Time = time.Now()
+			byte, _ := json.Marshal(data.Attachments)
+			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, string(string(byte)))
 			so.BroadcastToRoom(data.To_group_id, "getGroupMsg", data)
 			return data
 		}).
@@ -142,7 +144,7 @@ func GetWs() *socketio.Server {
 		}) interface{} {
 			data.Create_time = time.Now().Unix()
 			data.To_group_id = GetRandomString(90)
-			groupService.CreateGroup(data.Name, data.Group_notice, data.To_group_id, data.Creator_id, data.Create_time)
+			groupService.CreateGroup(data.Name, data.Group_notice, data.To_group_id, data.Creator_id)
 			groupService.JoinGroup(data.Creator_id, data.To_group_id)
 			so.Join(data.To_group_id)
 			return data
@@ -159,8 +161,8 @@ func GetWs() *socketio.Server {
 			UserInfo  map[string]interface{}
 			ToGroupId string
 		}) map[string]interface{} {
-			if groupService.IsInGroup(data.UserInfo["user_id"].(int), data.ToGroupId).RowsAffected < 1 {
-				groupService.JoinGroup(data.UserInfo["user_id"].(int), data.ToGroupId)
+			if groupService.IsInGroup(int(data.UserInfo["user_id"].(float64)), data.ToGroupId).RowsAffected < 1 {
+				groupService.JoinGroup(int(data.UserInfo["user_id"].(float64)), data.ToGroupId)
 				d := map[string]interface{}{
 					"message":     data.UserInfo["name"].(string) + "加入了群聊",
 					"to_group_id": data.ToGroupId,
@@ -182,16 +184,37 @@ func GetWs() *socketio.Server {
 			so.Leave(data.ToGroupId)
 			groupService.LeaveGroup(data.User_id, data.ToGroupId)
 		}).
-		OnEvent("getGroupMember", func(so socketio.Socket, data struct {
-			User_id   string
-			ToGroupId string
-		}) {
-			groupChatService.GetGroupMember(data.ToGroupId, 0, 0)
+		OnEvent("getGroupMember", func(so socketio.Socket, toGroupId string) interface{} {
+			t := groupChatService.GetGroupMember(toGroupId, 0, 0)
+			return t
+		}).
+		OnEvent("getUserInfo", func(so socketio.Socket, user_id int) interface{} {
+			t := &struct {
+				User_id int `json:"user_id"`
+				table.UserInfo
+			}{}
+			userService.GetUserInfo(user_id).Scan(&t)
+			return t
 		}).
 		OnEvent("fuzzyMatch", func(so socketio.Socket, data struct {
-			User_id   string
-			ToGroupId string
-		}) {
+			Field      string `json:"field"`
+			SearchUser bool   `json:"searchUser"`
+		}) map[string]interface{} {
+			var fuzzyMatchResult interface{}
+			data.Field = "%" + data.Field + "%"
+			if data.SearchUser {
+				fuzzyMatchResult = userService.FuzzyMatchUsers(data.Field)
+				log.Println()
+			} else {
+				fuzzyMatchResult = groupService.FuzzyMatchGroups(data.Field)
+				log.Println()
+			}
+
+			return map[string]interface{}{
+				"fuzzyMatchResult": fuzzyMatchResult,
+				"searchUser":       data.SearchUser,
+			}
+
 		}).
 		OnEvent("robotChat", func(so socketio.Socket, data struct {
 			User_id   int

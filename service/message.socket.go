@@ -2,20 +2,22 @@ package service
 
 import "gin/model/table"
 
+import "time"
+
 type Message struct{}
 
 type ClientHomePage struct {
-	Attachments    string `json:"attachments"`
-	Avatar         string `json:"avatar"`
-	Be_friend_time int    `json:"be_friend_time"`
-	Github_id      string `json:"github_id"`
-	Message        string `json:"message"`
-	Name           string `json:"name"`
-	ShowCallMeTip  bool   `json:"showCallMeTip"`
-	Time           int64  `json:"time"`
-	Unread         int    `json:"unread"`
-	User_id        int    `json:"user_id"`
-	To_group_id    string `json:"to_group_id"`
+	Attachments    string    `json:"attachments"`
+	Avatar         string    `json:"avatar"`
+	Be_friend_time int       `json:"be_friend_time"`
+	Github_id      int       `json:"github_id"`
+	Message        string    `json:"message"`
+	Name           string    `json:"name"`
+	ShowCallMeTip  bool      `json:"showCallMeTip"`
+	Time           time.Time `json:"time"`
+	Unread         int       `json:"unread"`
+	User_id        int       `json:"user_id"`
+	To_group_id    string    `json:"to_group_id"`
 }
 
 var (
@@ -39,7 +41,7 @@ func (this Message) GetPrivateMsg(toUser, user_id, start, count int) map[string]
 		To_group_id string `json:"to_group_id"`
 		Avatar      string `json:"avatar"`
 		Name        string `json:"name"`
-		Github_id   string `json:"github_id"`
+		Github_id   int    `json:"github_id"`
 	}{}
 	chatService.GetPrivateDetail(user_id, toUser, start-1, count).Scan(&messages)
 	var userInfo table.UserInfo
@@ -60,28 +62,28 @@ func (this Message) GetGroupItem(groupId string, start, count int) map[string]in
 	}
 
 	messages := []struct {
-		Message     string `json:"message"`
-		Attachments string `json:"attachments"`
-		Time        int    `json:"time"`
-		From_user   int    `json:"from_user"`
-		To_group_id string `json:"to_group_id"`
-		Avatar      string `json:"avatar"`
-		Name        string `json:"name"`
-		Github_id   string `json:"github_id"`
+		Message     string    `json:"message"`
+		Attachments string    `json:"attachments"`
+		Time        time.Time `json:"time"`
+		From_user   int       `json:"from_user"`
+		To_group_id string    `json:"to_group_id"`
+		Avatar      string    `json:"avatar"`
+		Name        string    `json:"name"`
+		Github_id   int       `json:"github_id"`
 	}{}
 
 	groupChatService.GetGroupMsg(groupId, start-1, count).Scan(&messages)
 	var groupInfo struct {
-		To_group_id string `json:"to_group_id"`
-		Name        string `json:"name"`
-		Creator_id  int    `json:"creator_id"`
-		Create_time int    `json:"create_time"`
+		To_group_id string    `json:"to_group_id"`
+		Name        string    `json:"name"`
+		Creator_id  int       `json:"creator_id"`
+		Create_time time.Time `json:"create_time"`
 		Members     []struct {
 			User_id   int    `json:"user_id"`
 			Socketid  string `json:"socketid"`
 			Name      string `json:"name"`
 			Avatar    string `json:"avatar"`
-			Github_id string `json:"github_id"`
+			Github_id int    `json:"github_id"`
 			Github    string `json:"github"`
 			Intro     string `json:"intro"`
 			Company   string `json:"company"`

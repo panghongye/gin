@@ -7,9 +7,9 @@ import (
 
 type UserService struct{}
 
-func (this UserService) FuzzyMatchUsers(name string) *table.UserInfo {
-	t := new(table.UserInfo)
-	db.Where("name LIKE ?", name).Find(t)
+func (this UserService) FuzzyMatchUsers(name string) []table.UserInfo {
+	t := []table.UserInfo{}
+	db.Table("user_info").Where("name LIKE ?", name).Scan(&t)
 	return t
 }
 
