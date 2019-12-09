@@ -16,7 +16,7 @@ import (
 var (
 	userService      service.UserService
 	groupService     service.GroupService
-	chatService      service.ChatServiceq
+	chatService      service.ChatService
 	groupChatService service.GroupChatService
 	message          service.Message
 )
