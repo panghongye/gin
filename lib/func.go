@@ -16,9 +16,9 @@ func GetRandomString(size int) string {
 	return string(result)
 }
 
-func StrMd5(str string) string {
-	return ""
+// func StrMd5(str string) string {
+	// return "333"
 	//has := md5.Sum([]byte(str))
 	//md5str := fmt.Sprintf("%x", has)
 	//return md5str
-}
+// }
