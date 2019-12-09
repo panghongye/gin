@@ -29,7 +29,7 @@ func (GroupService) IsInGroup(user_id int, to_group_id string) *gorm.DB {
 func (GroupService) CreateGroup(name, group_notice, to_group_id string, creator_id int) *gorm.DB {
 	_sql :=
 		`INSERT group_info (to_group_id,name,group_notice,creator_id,create_time) VALUES (?,?,?,?,?)`
-	return db.Exec(_sql, to_group_id, name, group_notice, creator_id, time.Now())
+	return db.Exec(_sql, to_group_id, name, group_notice, creator_id, int(time.Now().Unix()))
 }
 
 // 更新群信息

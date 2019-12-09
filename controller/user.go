@@ -1,13 +1,13 @@
 package controller
 
 import (
+	"gin/lib"
 	"gin/lib/jwt"
 	"gin/model/request"
 	"gin/model/response"
 	"gin/model/table"
 	"gin/service"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -38,7 +38,7 @@ func (this UserCtrl) Register(ctx *gin.Context) {
 		return
 	}
 
-	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password, Create_time: time.Now()}); t.ID == 0 {
+	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password}); t.ID == 0 {
 		res.Message = "注册失败"
 		res.Success = false
 	} else {
@@ -67,7 +67,7 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 		return
 	}
 
-	if user.Password == param.Password {
+	if user.Password == lib.StrMd5(param.Password) {
 		user.Password = ""
 		res.Success = true
 		token, err := jwt.Jwt.TokenCreate(jwt.PlayLoad{

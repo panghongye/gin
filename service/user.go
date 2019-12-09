@@ -1,7 +1,10 @@
 package service
 
 import (
+	"gin/lib"
 	"gin/model/table"
+	"time"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -14,6 +17,7 @@ func (this UserService) FuzzyMatchUsers(name string) []table.UserInfo {
 }
 
 func (this UserService) InsertData(user *table.UserInfo) *table.UserInfo {
+	user.Password = lib.StrMd5(user.Password)
 	db.Create(user)
 	return user
 }
@@ -51,9 +55,9 @@ func (UserService) IsFriend(user_id, from_user int) *gorm.DB {
 }
 
 // 两边都互加为好友
-func (UserService) AddFriendEachOther(user_id, from_user, time int64) *gorm.DB {
+func (UserService) AddFriendEachOther(user_id, from_user int) *gorm.DB {
 	var _sql = `INSERT INTO user_user_relation(user_id,from_user,time) VALUES (?,?,?), (?,?,?)`
-	return db.Raw(_sql, user_id, from_user, time, from_user, user_id, time)
+	return db.Exec(_sql, user_id, from_user, int(time.Now().Unix()), from_user, user_id, int(time.Now().Unix()))
 }
 
 // 删除联系人

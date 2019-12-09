@@ -61,6 +61,7 @@ func GetWs() *socketio.Server {
 			}
 			return "init group chat success"
 		}).
+		// todo 字段时间解析错误
 		OnEvent("initMessage", func(so socketio.Socket, obj struct {
 			User_id            int
 			ClientHomePageList []service.ClientHomePage
@@ -69,14 +70,14 @@ func GetWs() *socketio.Server {
 			return t
 		}).
 		OnEvent("sendPrivateMsg", func(so socketio.Socket, data struct {
-			From_user   int    `json:"from_user"`
-			To_user     int    `json:"to_user"`
-			Time        int64  `json:"time"`
-			Message     string `json:"message"`
-			Attachments string `json:"attachments"`
+			From_user   int           `json:"from_user"`
+			To_user     int           `json:"to_user"`
+			Time        int           `json:"time"`
+			Message     string        `json:"message"`
+			Name        string        `json:"name"`
+			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
-			data.Time = time.Now().Unix()
-			chatService.SavePrivateMsg(data.From_user, data.To_user, data.Time, data.Message, data.Attachments)
+			chatService.SavePrivateMsg(data.From_user, data.To_user, data.Message, AttachmentsTOJsonStr(data.Attachments))
 			var t struct {
 				Socketid string
 			}
@@ -93,14 +94,13 @@ func GetWs() *socketio.Server {
 		OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
 			From_user   int           `json:"from_user"`
 			To_group_id string        `json:"to_group_id"`
-			Time        time.Time     `json:"time"`
+			Time        int           `json:"time"`
 			Message     string        `json:"message"`
 			Name        string        `json:"name"`
 			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
-			data.Time = time.Now()
-			byte, _ := json.Marshal(data.Attachments)
-			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, string(string(byte)))
+			data.Time = int(time.Now().Unix())
+			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, AttachmentsTOJsonStr(data.Attachments))
 			so.BroadcastToRoom(data.To_group_id, "getGroupMsg", data)
 			return data
 		}).
@@ -117,7 +117,7 @@ func GetWs() *socketio.Server {
 		OnEvent("getOneGroupMessages", func(so socketio.Socket, data struct {
 			Start   int    `json:"start"`
 			GroupId string `json:"groupId"`
-			Time    int64  `json:"time"`
+			Time    int    `json:"time"`
 			Count   int    `json:"count"`
 		}) interface{} {
 			groupMessages := groupChatService.GetGroupMsg(data.GroupId, data.Start-1, data.Count)
@@ -140,9 +140,8 @@ func GetWs() *socketio.Server {
 			Group_notice string `json:"group_notice"`
 			Creator_id   int    `json:"creator_id"`
 			To_group_id  string `json:"to_group_id"`
-			Create_time  int64  `json:"create_time"`
+			Create_time  int    `json:"create_time"`
 		}) interface{} {
-			data.Create_time = time.Now().Unix()
 			data.To_group_id = GetRandomString(90)
 			groupService.CreateGroup(data.Name, data.Group_notice, data.To_group_id, data.Creator_id)
 			groupService.JoinGroup(data.Creator_id, data.To_group_id)
@@ -183,6 +182,18 @@ func GetWs() *socketio.Server {
 		}) {
 			so.Leave(data.ToGroupId)
 			groupService.LeaveGroup(data.User_id, data.ToGroupId)
+		}).
+		OnEvent("addAsTheContact", func(so socketio.Socket, data struct {
+			User_id   int `json:"user_id"`
+			From_user int `json:"from_user"`
+		}) interface{} {
+			userService.AddFriendEachOther(data.User_id, data.From_user)
+			t := &struct {
+				table.UserInfo
+				User_id int `json:"user_id"`
+			}{}
+			userService.GetUserInfo(data.From_user).Scan(&t)
+			return t
 		}).
 		OnEvent("getGroupMember", func(so socketio.Socket, toGroupId string) interface{} {
 			t := groupChatService.GetGroupMember(toGroupId, 0, 0)
@@ -266,4 +277,12 @@ func NewHttp() *HttpRequest.Request {
 	// 	"sessionid": "LSIE89SFLKGHHASLC9EETFBVNOPOXNM",
 	// })
 	return req
+}
+
+func AttachmentsTOJsonStr(attachments interface{}) string {
+	byte, err := json.Marshal(attachments)
+	if err != nil {
+		return "[]"
+	}
+	return string(byte)
 }
