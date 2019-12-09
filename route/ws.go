@@ -1,7 +1,8 @@
-package lib
+package route
 
 import (
 	"encoding/json"
+	"gin/lib"
 	"gin/model/table"
 	"gin/service"
 	"gin/socketio"
@@ -9,20 +10,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kirinlabs/HttpRequest"
 	"github.com/sirupsen/logrus"
 )
 
 var (
 	userService      service.UserService
 	groupService     service.GroupService
-	chatService      service.ChatService
+	chatService      service.ChatServiceq
 	groupChatService service.GroupChatService
 	message          service.Message
 )
 
-func GetWs() *socketio.Server {
+func getWs() *socketio.Server {
 	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
+
 	server.OnError(func(err error) {
 		logrus.Error("[server.OnError]", err)
 	})
@@ -77,7 +78,7 @@ func GetWs() *socketio.Server {
 			Name        string        `json:"name"`
 			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
-			chatService.SavePrivateMsg(data.From_user, data.To_user, data.Message, AttachmentsTOJsonStr(data.Attachments))
+			chatService.SavePrivateMsg(data.From_user, data.To_user, data.Message, attachmentsTOJsonStr(data.Attachments))
 			var t struct {
 				Socketid string
 			}
@@ -100,7 +101,7 @@ func GetWs() *socketio.Server {
 			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
 			data.Time = int(time.Now().Unix())
-			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, AttachmentsTOJsonStr(data.Attachments))
+			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, attachmentsTOJsonStr(data.Attachments))
 			so.BroadcastToRoom(data.To_group_id, "getGroupMsg", data)
 			return data
 		}).
@@ -142,7 +143,7 @@ func GetWs() *socketio.Server {
 			To_group_id  string `json:"to_group_id"`
 			Create_time  int    `json:"create_time"`
 		}) interface{} {
-			data.To_group_id = GetRandomString(90)
+			data.To_group_id = lib.GetRandomString(90)
 			groupService.CreateGroup(data.Name, data.Group_notice, data.To_group_id, data.Creator_id)
 			groupService.JoinGroup(data.Creator_id, data.To_group_id)
 			so.Join(data.To_group_id)
@@ -232,7 +233,7 @@ func GetWs() *socketio.Server {
 			ToGroupId string
 			Message   string
 		}) map[string]interface{} {
-			req := NewHttp()
+			req := lib.NewHttp()
 			resp, err := req.Post("http://www.tuling123.com/openapi/api", map[string]interface{}{
 				"key":    "4e348b4a62ca43b5870b16dc58fbcc93",
 				"info":   data.Message,
@@ -266,20 +267,7 @@ func GetWs() *socketio.Server {
 	return server
 }
 
-func NewHttp() *HttpRequest.Request {
-	req := HttpRequest.NewRequest()
-	// 设置Headers
-	req.SetHeaders(map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded", //这也是HttpRequest包的默认设置
-	})
-	// 设置Cookies
-	// req.SetCookies(map[string]string{
-	// 	"sessionid": "LSIE89SFLKGHHASLC9EETFBVNOPOXNM",
-	// })
-	return req
-}
-
-func AttachmentsTOJsonStr(attachments interface{}) string {
+func attachmentsTOJsonStr(attachments interface{}) string {
 	byte, err := json.Marshal(attachments)
 	if err != nil {
 		return "[]"

@@ -2,7 +2,6 @@ package route
 
 import (
 	"gin/controller"
-	"gin/lib"
 	"gin/lib/jwt"
 	"gin/middleware"
 	"time"
@@ -24,7 +23,7 @@ func BuildRouter() *gin.Engine {
 		v1.POST("/login", userCtrl.Login)
 		v1.POST("/github_oauth")
 		v1.POST("/register", userCtrl.Register)
-		ws := lib.GetWs()
+		ws := getWs()
 		// router.Any("/socket.io/*any", middleware.Auth, gin.WrapH(ws))
 		router.Any("/socket.io/*any", gin.WrapH(ws))
 	}

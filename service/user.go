@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"gin/lib"
@@ -17,7 +17,7 @@ func (this UserService) FuzzyMatchUsers(name string) []table.UserInfo {
 }
 
 func (this UserService) InsertData(user *table.UserInfo) *table.UserInfo {
-	user.Password = lib.StrMd5(user.Password)
+	user.Password = lib.Str_Md5(user.Password)
 	db.Create(user)
 	return user
 }

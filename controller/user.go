@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"gin/lib"
 	"gin/lib/jwt"
 	"gin/model/request"
 	"gin/model/response"
@@ -67,7 +66,7 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 		return
 	}
 
-	if user.Password == lib.StrMd5(param.Password) {
+	if user.Password == (param.Password) {
 		user.Password = ""
 		res.Success = true
 		token, err := jwt.Jwt.TokenCreate(jwt.PlayLoad{
