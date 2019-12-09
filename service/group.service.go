@@ -23,7 +23,7 @@ func (GroupService) JoinGroup(user_id int, to_group_id string) *gorm.DB {
 
 func (GroupService) IsInGroup(user_id int, to_group_id string) *gorm.DB {
 	_sql := `SELECT * FROM group_user_relation WHERE user_id = ? AND to_group_id = ?;`
-	return db.Exec(_sql, user_id, to_group_id)
+	return db.Raw(_sql, user_id, to_group_id)
 }
 
 func (GroupService) CreateGroup(name, group_notice, to_group_id string, creator_id int) *gorm.DB {

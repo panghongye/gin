@@ -19,15 +19,15 @@ var (
 	chatService      service.ChatService
 	groupChatService service.GroupChatService
 	message          service.Message
+	ws               *socketio.Server
 )
 
-func getWs() *socketio.Server {
-	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
-
-	server.OnError(func(err error) {
-		logrus.Error("[server.OnError]", err)
+func init() {
+	ws, _ = socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
+	ws.OnError(func(err error) {
+		logrus.Error("[ws.OnError]", err)
 	})
-	server.Namespace("/").
+	ws.Namespace("/").
 		OnError(func(so socketio.Socket, err ...interface{}) {
 			log.Println("OnError <<", so.Sid())
 			logrus.Error("[so.OnError]", err)
@@ -158,20 +158,19 @@ func getWs() *socketio.Server {
 			return "修改群资料成功"
 		}).
 		OnEvent("joinGroup", func(so socketio.Socket, data struct {
-			UserInfo  map[string]interface{}
+			UserInfo  table.UserInfo
 			ToGroupId string
 		}) map[string]interface{} {
-			if groupService.IsInGroup(int(data.UserInfo["user_id"].(float64)), data.ToGroupId).RowsAffected < 1 {
-				groupService.JoinGroup(int(data.UserInfo["user_id"].(float64)), data.ToGroupId)
-				d := map[string]interface{}{
-					"message":     data.UserInfo["name"].(string) + "加入了群聊",
-					"to_group_id": data.ToGroupId,
-					"tip":         "joinGroup",
-				}
-				for k, v := range data.UserInfo {
-					d[k] = v
-				}
-				so.BroadcastToRoom(data.ToGroupId, "getGroupMsg", d)
+			t := []interface{}{}
+			groupService.IsInGroup(data.UserInfo.ID, data.ToGroupId).Scan(&t)
+			if len(t) < 1 {
+				groupService.JoinGroup(data.UserInfo.ID, data.ToGroupId)
+				so.BroadcastToRoom(data.ToGroupId, "getGroupMsg", struct {
+					table.UserInfo
+					message     string
+					to_group_id string
+					tip         string
+				}{data.UserInfo, data.UserInfo.Name + "加入了群聊", data.ToGroupId, "joinGroup"})
 			}
 			so.Join(data.ToGroupId)
 			groupItem := message.GetGroupItem(data.ToGroupId, 0, 0)
@@ -249,7 +248,7 @@ func getWs() *socketio.Server {
 
 	// assets
 	{
-		server.Namespace("/test").
+		ws.Namespace("/test").
 			OnDisconnect(func(so socketio.Socket) {
 				so.LeaveAll()
 				so.Close()
@@ -263,8 +262,6 @@ func getWs() *socketio.Server {
 				return data
 			})
 	}
-
-	return server
 }
 
 func attachmentsTOJsonStr(attachments interface{}) string {

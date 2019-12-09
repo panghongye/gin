@@ -80,7 +80,7 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 			table.UserInfo
 			Token   string `json:"token"`
 			User_id int    `json:"user_id"`
-		}{*user, token, int(user.ID)}
+		}{*user, token, user.ID}
 	} else {
 		res.Success = false
 		res.Message = "密码不正确"
