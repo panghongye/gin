@@ -70,6 +70,11 @@
       console.log(msg)
       $('#messages').append($('<li>').text(msg));
     });
+
+    socket.on('ack', function (name, fn) {
+      console.log(name,3333333333);
+      fn('bar');
+    })
   </script>
 
 </body>

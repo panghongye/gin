@@ -1,0 +1,36 @@
+package route
+
+import (
+	"gin/service"
+	"log"
+	"time"
+
+	engineio "github.com/googollee/go-engine.io"
+	socketio "github.com/googollee/go-socket.io"
+)
+
+func getWs1() *socketio.Server {
+	server, err := socketio.NewServer(&engineio.Options{PingTimeout: time.Second * 2, PingInterval: time.Second * 2})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server.OnError("/", func(e error) {
+		log.Println("【错误】<<", e)
+	})
+
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		log.Println("【断开】<<", reason, s.Close())
+	})
+
+	server.OnConnect("/", func(so socketio.Conn) error {
+		log.Println("【连接】<<", so.ID())
+		so.Emit("initSocket", so.ID(), func(userId int, homePageList []service.ClientHomePage) {
+			log.Println(userId, homePageList)
+		})
+		return nil
+	})
+
+	go server.Serve()
+	return server
+}

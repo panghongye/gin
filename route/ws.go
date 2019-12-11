@@ -19,11 +19,10 @@ var (
 	chatService      service.ChatService
 	groupChatService service.GroupChatService
 	message          service.Message
-	ws               *socketio.Server
 )
 
-func init() {
-	ws, _ = socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
+func getWs() *socketio.Server {
+	ws, _ := socketio.NewServer(time.Second, time.Second, socketio.DefaultParser)
 	ws.OnError(func(err error) {
 		logrus.Error("[ws.OnError]", err)
 	})
@@ -31,17 +30,18 @@ func init() {
 	np := ws.Namespace("/")
 
 	np.OnError(func(so socketio.Socket, err ...interface{}) {
-		log.Println("【错误】 <<", so.Sid())
-		logrus.Error("[so.OnError]", err)
+		log.Println("【错误】<<", so.Sid(), err, so.Close())
 	})
 
 	np.OnDisconnect(func(so socketio.Socket) {
-		log.Println("【断开】 <<", so.Sid())
-		so.Close()
+		log.Println("【断开】<<", so.Sid(), so.Close())
 	})
 
 	np.OnConnect(func(so socketio.Socket) {
 		log.Println("【连接】<<", so.Sid())
+		so.Emit("initSocket", so.Sid(), func(userId int, homePageList []service.ClientHomePage) {
+			log.Println(userId, homePageList)
+		})
 	})
 
 	np.OnEvent("initSocket", func(s socketio.Socket, userID int) string {
@@ -277,12 +277,16 @@ func init() {
 			OnConnect(func(so socketio.Socket) {
 				so.Join("a")
 				log.Println("连接 <<", so.Sid())
+				so.Emit("ack", "foo", func(msg string) {
+					log.Println(msg)
+				})
 			}).
 			OnEvent("chat message", func(so socketio.Socket, data string) string {
 				so.BroadcastToRoom("a", "chat message", so.Sid()+":"+data)
 				return data
 			})
 	}
+	return ws
 }
 
 func attachmentsTOJsonStr(attachments interface{}) string {
