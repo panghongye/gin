@@ -12,6 +12,10 @@ require (
 	github.com/kirinlabs/HttpRequest v0.1.5
 	github.com/lestrrat-go/file-rotatelogs v2.2.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.0 // indirect
+	github.com/mlsquires/socketio v0.0.0-20180414171845-169a6f09e624
+	github.com/pschlump/MiscLib v1.0.0
+	github.com/pschlump/godebug v1.0.0
+	github.com/pschlump/json v1.12.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.1
 	github.com/tinylib/msgp v1.1.0

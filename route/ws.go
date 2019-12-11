@@ -38,9 +38,8 @@ func getWs() *socketio.Server {
 
 	np.OnConnect(func(so socketio.Socket) {
 		logrus.Info("【连接】<<", so.Sid())
-		// TODO 失败？
 		so.Emit("initSocket", so.Sid(), func(userId int, homePageList []service.ClientHomePage) {
-			logrus.Info(userId, homePageList)
+			logrus.Info(userId, homePageList) // TODO :OnConnect里:Emit ack回调不执行？ 其他地方可以
 		})
 	})
 
