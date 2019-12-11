@@ -31,25 +31,17 @@ func init() {
 	np := ws.Namespace("/")
 
 	np.OnError(func(so socketio.Socket, err ...interface{}) {
-		log.Println("OnError <<", so.Sid())
+		log.Println("【错误】 <<", so.Sid())
 		logrus.Error("[so.OnError]", err)
 	})
 
 	np.OnDisconnect(func(so socketio.Socket) {
-		log.Println("OnDisconnect:<<", so.Sid())
+		log.Println("【断开】 <<", so.Sid())
 		so.Close()
 	})
 
 	np.OnConnect(func(so socketio.Socket) {
-    // console.log('connection socketId=>', socketId, 'time=>', new Date().toLocaleString());
-    //  获取群聊和私聊的数据
-    // await emitAsync(socket, 'initSocket', socketId, (userId, homePageList) => {
-    //   console.log('userId', userId)
-    //   user_id = userId;
-    //   clientHomePageList = homePageList;
-    // });
-		// allMessage:=getAllMessage(user_id,clientHomePageList)
-		// so.Emit("initSocketSuccess",allMessage)
+		log.Println("【连接】<<", so.Sid())
 	})
 
 	np.OnEvent("initSocket", func(s socketio.Socket, userID int) string {
