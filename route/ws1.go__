@@ -16,17 +16,17 @@ func getWs1() *socketio.Server {
 	}
 
 	server.OnError("/", func(e error) {
-		log.Println("【错误】<<", e)
+		logrus.Info("【错误】<<", e)
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		log.Println("【断开】<<", reason, s.Close())
+		logrus.Info("【断开】<<", reason, s.Close())
 	})
 
 	server.OnConnect("/", func(so socketio.Conn) error {
-		log.Println("【连接】<<", so.ID())
+		logrus.Info("【连接】<<", so.ID())
 		so.Emit("initSocket", so.ID(), func(userId int, homePageList []service.ClientHomePage) {
-			log.Println(userId, homePageList)
+			logrus.Info(userId, homePageList)
 		})
 		return nil
 	})

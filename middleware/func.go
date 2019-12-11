@@ -4,9 +4,9 @@ import (
 	"errors"
 	"gin/lib/jwt"
 	"gin/model/response"
-	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func Cros(c *gin.Context) {
@@ -36,7 +36,7 @@ func SendErr(err error, c *gin.Context) bool {
 	if err == nil {
 		return false
 	}
-	log.Println("SendErr ", err)
+	logrus.Info("SendErr ", err)
 	c.JSON(200, response.Response{
 		Message: err.Error(),
 	})

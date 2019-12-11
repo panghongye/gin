@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/tinylib/msgp/msgp"
 )
 
@@ -12,16 +13,16 @@ func ExampleDial() {
 	c := NewClient()
 	c.Namespace("/").
 		OnConnect(func(so Socket) {
-			log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+			logrus.Info("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
 			if err := so.Emit("binary", "bytes", &Bytes{Data: []byte{1, 2, 3, 4, 5, 6}}); err != nil {
-				log.Println("so.Emit:", err)
+				logrus.Info("so.Emit:", err)
 			}
 		}).
 		OnDisconnect(func(so Socket) {
 			log.Printf("%v %v %q disconnected", so.Sid(), so.RemoteAddr(), so.Namespace())
 		}).
 		OnError(func(so Socket, err ...interface{}) {
-			log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
+			logrus.Info("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
 		}).
 		OnEvent("event", func(message string, b Bytes) {
 			bb, _ := b.MarshalBinary()
@@ -30,7 +31,7 @@ func ExampleDial() {
 
 	err := c.Dial("ws://localhost:8081/socket.io/", nil, WebsocketTransport, DefaultParser)
 	if err != nil {
-		log.Println(err.Error())
+		logrus.Info(err.Error())
 		return
 	}
 	defer c.Close()
@@ -38,9 +39,9 @@ func ExampleDial() {
 	for {
 		<-time.After(time.Second * 2)
 		if err := c.Emit("/", "foobar", "foo", func(a, b string) {
-			log.Println("foobar =>", a, b)
+			logrus.Info("foobar =>", a, b)
 		}); err != nil {
-			log.Println("c.Emit:", err)
+			logrus.Info("c.Emit:", err)
 			break
 		}
 	}
@@ -49,12 +50,12 @@ func ExampleDial() {
 func ExampleServer() {
 	server, _ := NewServer(time.Second*5, time.Second*5, DefaultParser)
 	var onConnect = func(so Socket) {
-		log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+		logrus.Info("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
 		go func() {
 			for {
 				<-time.After(time.Second * 2)
 				if err := so.Emit("event", "check it out!", time.Now()); err != nil {
-					log.Println("emit:", err)
+					logrus.Info("emit:", err)
 					return
 				}
 			}
@@ -67,7 +68,7 @@ func ExampleServer() {
 	}
 
 	var onError = func(so Socket, err ...interface{}) {
-		log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
+		logrus.Info("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
 	}
 
 	server.Namespace("/").
@@ -79,7 +80,7 @@ func ExampleServer() {
 				bb, _ := b.MarshalBinary()
 				log.Printf("%s=> %x", msg, bb)
 			}); err != nil {
-				log.Println("emit:", err)
+				logrus.Info("emit:", err)
 			}
 		}).
 		OnEvent("binary", func(data interface{}, b Bytes) {
@@ -87,13 +88,13 @@ func ExampleServer() {
 			log.Printf("%s <- %x", data, bb)
 		}).
 		OnEvent("foobar", func(data string) (string, string) {
-			log.Println("foobar:", data)
+			logrus.Info("foobar:", data)
 			return "foo", "bar"
 		})
 
 	server.Namespace("/ditto").
 		OnConnect(func(so Socket) {
-			log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+			logrus.Info("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
 		}).
 		OnDisconnect(onDisconnect).
 		OnError(onError).
@@ -113,7 +114,7 @@ func ExampleServer_withMsgpackParser() {
 	server, _ := NewServer(time.Second*5, time.Second*5, MsgpackParser)
 	server.Namespace("/").
 		OnConnect(func(so Socket) {
-			log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+			logrus.Info("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
 			so.Emit("event", "hello world!", time.Now())
 		}).
 		OnDisconnect(func(so Socket) {
@@ -123,10 +124,10 @@ func ExampleServer_withMsgpackParser() {
 			log.Printf("%x %v", b, data)
 		}).
 		OnError(func(so Socket, err ...interface{}) {
-			log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
+			logrus.Info("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
 		})
 	server.OnError(func(err error) {
-		log.Println("server err:", err)
+		logrus.Info("server err:", err)
 	})
 	defer server.Close()
 	log.Fatalln(http.ListenAndServe("localhost:8081", server))

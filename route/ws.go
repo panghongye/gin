@@ -6,7 +6,6 @@ import (
 	"gin/model/table"
 	"gin/service"
 	"gin/socketio"
-	"log"
 	"strings"
 	"time"
 
@@ -30,17 +29,18 @@ func getWs() *socketio.Server {
 	np := ws.Namespace("/")
 
 	np.OnError(func(so socketio.Socket, err ...interface{}) {
-		log.Println("【错误】<<", so.Sid(), err, so.Close())
+		logrus.Info("【错误】<<", so.Sid(), err, so.Close())
 	})
 
 	np.OnDisconnect(func(so socketio.Socket) {
-		log.Println("【断开】<<", so.Sid(), so.Close())
+		logrus.Info("【断开】<<", so.Sid(), so.Close())
 	})
 
 	np.OnConnect(func(so socketio.Socket) {
-		log.Println("【连接】<<", so.Sid())
+		logrus.Info("【连接】<<", so.Sid())
+		// TODO 失败？
 		so.Emit("initSocket", so.Sid(), func(userId int, homePageList []service.ClientHomePage) {
-			log.Println(userId, homePageList)
+			logrus.Info(userId, homePageList)
 		})
 	})
 
@@ -235,10 +235,10 @@ func getWs() *socketio.Server {
 		data.Field = "%" + data.Field + "%"
 		if data.SearchUser {
 			fuzzyMatchResult = userService.FuzzyMatchUsers(data.Field)
-			log.Println()
+			logrus.Info()
 		} else {
 			fuzzyMatchResult = groupService.FuzzyMatchGroups(data.Field)
-			log.Println()
+			logrus.Info()
 		}
 
 		return map[string]interface{}{
@@ -263,7 +263,9 @@ func getWs() *socketio.Server {
 		s := string(d)
 		m := map[string]interface{}{}
 		err = json.Unmarshal([]byte(s), &m)
-		log.Println(err)
+		if err != nil {
+			logrus.Error(err)
+		}
 		return m
 	})
 
@@ -276,9 +278,9 @@ func getWs() *socketio.Server {
 			}).
 			OnConnect(func(so socketio.Socket) {
 				so.Join("a")
-				log.Println("连接 <<", so.Sid())
+				logrus.Info("连接 <<", so.Sid())
 				so.Emit("ack", "foo", func(msg string) {
-					log.Println(msg)
+					logrus.Info(msg)
 				})
 			}).
 			OnEvent("chat message", func(so socketio.Socket, data string) string {
