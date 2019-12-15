@@ -25,24 +25,24 @@ func (this UserCtrl) Register(ctx *gin.Context) {
 	param := new(request.LoginParam)
 	if err := ctx.ShouldBind(param); err != nil {
 		logrus.Info("注册参数错误: ", err)
-		res.Message = "注册参数错误"
+		res.Msg = "注册参数错误"
 		res.Success = false
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
 	if t := userService.FindDataByName(param.Name); t.ID != 0 {
-		res.Message = "用户已存在"
+		res.Msg = "用户已存在"
 		res.Success = false
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
 	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password}); t.ID == 0 {
-		res.Message = "注册失败"
+		res.Msg = "注册失败"
 		res.Success = false
 	} else {
-		res.Message = "注册成功"
+		res.Msg = "注册成功"
 		res.Success = true
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -53,7 +53,7 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 	var param request.LoginParam
 	if err := ctx.ShouldBind(&param); err != nil {
 		logrus.Info("登录参数错误: ", err)
-		res.Message = "登录参数错误"
+		res.Msg = "登录参数错误"
 		res.Success = false
 		ctx.JSON(http.StatusOK, res)
 		return
@@ -61,7 +61,7 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 
 	user := userService.FindDataByName(param.Name)
 	if user.ID == 0 {
-		res.Message = "用户不存在"
+		res.Msg = "用户不存在"
 		res.Success = false
 		ctx.JSON(http.StatusOK, res)
 		return
@@ -74,16 +74,15 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 		})
 		if err != nil {
 			res.Success = false
-			res.Message = err.Error()
+			res.Msg = err.Error()
 		}
-		res.UserInfo = struct {
+		res.Data = struct {
 			table.UserInfo
-			Token   string `json:"token"`
-			User_id int    `json:"user_id"`
-		}{*user, token, user.ID}
+			Token string `json:"token"`
+		}{*user, token}
 	} else {
 		res.Success = false
-		res.Message = "密码不正确"
+		res.Msg = "密码不正确"
 	}
 	ctx.JSON(http.StatusOK, res)
 }

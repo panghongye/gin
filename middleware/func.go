@@ -23,12 +23,14 @@ func Cros(c *gin.Context) {
 func Auth(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
-		SendErr(errors.New("token 无效"), c)
+		SendErr(errors.New("token 不存在"), c)
 	}
-	_, err := jwt.Jwt.TokenParse(token)
+	claims, err := jwt.Jwt.TokenParse(token)
 	if err != nil {
+		c.Set("token", nil)
 		SendErr(err, c)
 	}
+	c.Set("token", claims)
 }
 
 // 有错时 返回 true
@@ -36,9 +38,9 @@ func SendErr(err error, c *gin.Context) bool {
 	if err == nil {
 		return false
 	}
-	logrus.Info("SendErr ", err)
+	logrus.Error("SendErr ", err)
 	c.JSON(200, response.Response{
-		Message: err.Error(),
+		Msg: err.Error(),
 	})
 	c.Abort()
 	return true

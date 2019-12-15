@@ -9,8 +9,8 @@ import (
 
 type GroupService struct{}
 
-func (GroupService) FuzzyMatchGroups(name string) []table.Group_info {
-	t := []table.Group_info{}
+func (GroupService) FuzzyMatchGroups(name string) []table.GroupInfo {
+	t := []table.GroupInfo{}
 	sql := `SELECT * FROM group_info WHERE name LIKE ?;`
 	db.Raw(sql, name).Scan(&t)
 	return t

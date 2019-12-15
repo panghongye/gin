@@ -3,7 +3,7 @@ package table
 type UserInfo struct {
 	ID        int    `gorm:"primary_key" json:"id"`
 	Github_id int    `json:"github_id"`
-	Name      string `json:"name"`
+	Name      string `json:"name" gorm:"unique;not null"`
 	Password  string `json:"-"`
 	Avatar    string `json:"avatar"`
 	Location  string `json:"location"`
@@ -14,7 +14,7 @@ type UserInfo struct {
 	Company   string `json:"company"`
 }
 
-type Group_info struct {
+type GroupInfo struct {
 	ID           int    `gorm:"primary_key" json:"id"`
 	To_group_id  string `json:"to_group_id"`
 	Name         string `json:"name"`
@@ -37,7 +37,7 @@ type Group_msg struct {
 	To_group_id string `json:"to_group_id"`
 	Message     string `json:"message"`
 	Time        int    `json:"time"`
-	Attachments string `json:"attachments"`
+	Attachments string `json:"attachments" gorm:"type:json" `
 }
 
 type Private_msg struct {
@@ -46,7 +46,7 @@ type Private_msg struct {
 	To_user     int    `json:"to_user"`
 	Message     string `json:"message"`
 	Time        int    `json:"time"`
-	Attachments string `json:"attachments"`
+	Attachments string `json:"attachments" gorm:"type:json" `
 }
 
 type Group_user_relation struct {

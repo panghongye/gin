@@ -25,7 +25,7 @@ func init() {
 		new(table.UserInfo),
 		new(table.User_user_relation),
 		new(table.Group_msg),
-		new(table.Group_info),
+		new(table.GroupInfo),
 		new(table.Group_user_relation),
 		new(table.Private_msg),
 	)
