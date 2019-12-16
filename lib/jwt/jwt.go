@@ -7,11 +7,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var Jwt *tk
+var Singleton *tk
 
-type PlayLoad map[string]interface{}
 type Claims struct {
-	PlayLoad `json:"playLoad"`
+	PlayLoad string `json:"playLoad"`
 	jwt.StandardClaims
 }
 
@@ -20,15 +19,13 @@ type tk struct {
 	expiresAt time.Duration
 }
 
-func (this tk) TokenCreate(playLoad PlayLoad) (string, error) {
-	claims := Claims{
+func (this tk) TokenCreate(playLoad string) (string, error) {
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		playLoad,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(this.expiresAt).Unix(),
 		},
-	}
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return tokenClaims.SignedString(this.secret)
+	}).SignedString(this.secret)
 }
 
 func (this tk) TokenParse(tokenString string) (*Claims, error) {
@@ -55,9 +52,9 @@ func (this *tk) TokenRefresh(tokenString string) (string, error) {
 }
 
 func New(secret string, expiresAt time.Duration) *tk {
-	if Jwt != nil {
-		return Jwt
+	if Singleton != nil {
+		return Singleton
 	}
-	Jwt = &tk{[]byte(secret), expiresAt}
-	return Jwt
+	Singleton = &tk{[]byte(secret), expiresAt}
+	return Singleton
 }

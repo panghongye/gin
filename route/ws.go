@@ -3,23 +3,25 @@ package route
 import (
 	"encoding/json"
 	"gin/lib"
+	"gin/lib/convert"
+	"gin/lib/jwt"
 	"gin/model/response"
 	"gin/model/table"
 	"gin/service"
 	"gin/socketio"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	userService      service.UserService
-	groupService     service.GroupService
-	chatService      service.ChatService
-	groupChatService service.GroupChatService
-	message          service.Message
+	userService  service.UserService
+	groupService service.GroupService
 )
+
+type Param struct {
+	Token string `json:"token"`
+}
 
 func getWs() *socketio.Server {
 	ws, _ := socketio.NewServer(time.Second*25, time.Second*3, socketio.DefaultParser)
@@ -29,7 +31,9 @@ func getWs() *socketio.Server {
 
 	{ // 业务
 		np := ws.Namespace("/").OnConnect(func(so socketio.Socket) {
-			logrus.Info("【连接】<<", so.Sid())
+			prefix := "【连接】"
+			logrus.Info(prefix+"<<", so.Sid())
+			// fmt.Println("已连接数")
 		})
 
 		np.OnError(func(so socketio.Socket, err ...interface{}) {
@@ -40,115 +44,83 @@ func getWs() *socketio.Server {
 			logrus.Info("【断开】<<", so.Sid(), so.Close())
 		})
 
-		np.OnEvent("init", func(s socketio.Socket, userID int) response.Response {
-			var t table.UserInfo
-			userService.GetUserInfo(userID).Scan(&t)
-			socketId := s.Sid()
-			if t.Socketid != "" {
-				socketId = strings.Split(t.Socketid, ",")[0] + "," + socketId
-			}
-			data := response.Response{}
-			if result := userService.SaveUserSocketId(userID, socketId); result.Error != nil {
-				data = response.Response{Code: 500, Msg: result.Error.Error()}
-				return data
+		np.OnEvent("init", func(so socketio.Socket, param Param) response.Response {
+			prefix := "【ws init】"
+			token, err := getTokenData(prefix, param.Token)
+			if err != nil {
+				return response.Response{Msg: err.Error(), Success: false}
 			}
 
-			return data
+			var t table.UserInfo
+			userService.GetUserInfo(convert.StringToInt(token.PlayLoad)).Scan(&t)
+			return response.Response{Success: true, Data: t}
+			// todo 获取消息列表
+
 		})
 
 		np.OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
-			From_user   int           `json:"from_user"`
-			To_group_id string        `json:"to_group_id"`
-			Time        int           `json:"time"`
+			FromUser    int           `json:"from_user"`
+			GroupID     string        `json:"groupId"`
+			Time        time.Time     `json:"time"`
 			Message     string        `json:"message"`
 			Name        string        `json:"name"`
 			Attachments []interface{} `json:"attachments"`
 		}) interface{} {
-			data.Time = int(time.Now().Unix())
-			groupChatService.SaveGroupMsg(data.From_user, data.To_group_id, data.Message, attachmentsTOJsonStr(data.Attachments))
-			so.BroadcastToRoom(data.To_group_id, "getGroupMsg", data)
+			data.Time = time.Now()
+			// groupChatService.SaveGroupMsg(data.FromUser, data.GroupID, data.Message, attachmentsTOJsonStr(data.Attachments))
+			so.BroadcastToRoom(data.GroupID, "getGroupMsg", data)
 			return data
 		})
 
-		np.OnEvent("getOneGroupMessages", func(so socketio.Socket, data struct {
-			Start   int    `json:"start"`
-			GroupId string `json:"groupId"`
-			Time    int    `json:"time"`
-			Count   int    `json:"count"`
-		}) interface{} {
-			groupMessages := groupChatService.GetGroupMsg(data.GroupId, data.Start-1, data.Count)
-			return groupMessages.Value
-		})
-
-		np.OnEvent("getOneGroupItem", func(so socketio.Socket, data struct {
-			GroupId string `json:"groupId"`
-			Start   int    `json:"start"`
-			Count   int    `json:"count"`
-		}) map[string]interface{} {
-			if data.Start < 1 {
-				data.Start = 1
-			}
-			groupMsgAndInfo := message.GetGroupItem(data.GroupId, data.Start, 20)
-			return groupMsgAndInfo
-		})
-
 		np.OnEvent("newGroup", func(so socketio.Socket, data struct {
-			Name         string `json:"name"`
-			Group_notice string `json:"group_notice"`
-			Creator_id   int    `json:"creator_id"`
-			To_group_id  string `json:"to_group_id"`
-			Create_time  int    `json:"create_time"`
+			Name        string `json:"name"`
+			GroupNotice string `json:"groupNotice"`
+			UserId      int    `json:"userID"`
+			GroupID     string `json:"groupId"`
+			CreateTime  int    `json:"createTime"`
 		}) interface{} {
-			data.To_group_id = lib.GetRandomString(90)
-			groupService.CreateGroup(data.Name, data.Group_notice, data.To_group_id, data.Creator_id)
-			groupService.JoinGroup(data.Creator_id, data.To_group_id)
-			so.Join(data.To_group_id)
+			data.GroupID = convert.RandomString(20)
+			groupService.CreateGroup(data.Name, data.GroupNotice, data.GroupID, data.UserId)
+			groupService.JoinGroup(data.UserId, data.GroupID)
+			so.Join(data.GroupID)
+			return data
+		})
+
+		np.OnEvent("newContact", func(so socketio.Socket, data struct {
+			UserId int `json:"userID"`
+		}) interface{} {
+			// data.GroupID = lib.GetRandomString(90)
+			// groupService.CreateGroup(data.Name, data.GroupNotice, data.GroupID, data.UserId)
+			// groupService.JoinGroup(data.UserId, data.GroupID)
+			// so.Join(data.GroupID)
 			return data
 		})
 
 		np.OnEvent("updateGroupInfo", func(so socketio.Socket, data struct {
-			Name         string `json:"name"`
-			Group_notice string `json:"group_notice"`
-			To_group_id  string `json:"to_group_id"`
+			Name        string `json:"name"`
+			GroupNotice string `json:"group_notice"`
+			GroupID     string `json:"groupId"`
 		}) string {
-			groupService.UpdateGroupInfo(data.Name, data.Group_notice, data.To_group_id)
+			groupService.UpdateGroupInfo(data.Name, data.GroupNotice, data.GroupID)
 			return "修改群资料成功"
 		})
 
 		np.OnEvent("joinGroup", func(so socketio.Socket, data struct {
-			UserInfo  table.UserInfo
-			ToGroupId string
-		}) map[string]interface{} {
-			t := []interface{}{}
-			groupService.IsInGroup(data.UserInfo.ID, data.ToGroupId).Scan(&t)
-			if len(t) < 1 {
-				groupService.JoinGroup(data.UserInfo.ID, data.ToGroupId)
-				so.BroadcastToRoom(data.ToGroupId, "getGroupMsg", struct {
-					table.UserInfo
-					message     string
-					to_group_id string
-					tip         string
-				}{data.UserInfo, data.UserInfo.Name + "加入了群聊", data.ToGroupId, "joinGroup"})
-			}
-			so.Join(data.ToGroupId)
-			groupItem := message.GetGroupItem(data.ToGroupId, 0, 0)
-			return groupItem
+			UserId  int
+			GroupID string
+		}) {
 		})
 
 		np.OnEvent("leaveGroup", func(so socketio.Socket, data struct {
-			User_id   string
-			ToGroupId string
+			UserID  string
+			GroupID string
 		}) {
-			so.Leave(data.ToGroupId)
-			groupService.LeaveGroup(data.User_id, data.ToGroupId)
+			so.Leave(data.GroupID)
+			groupService.LeaveGroup(data.UserID, data.GroupID)
 		})
 
-
-		np.OnEvent("getUserInfo", func(so socketio.Socket, user_id int) interface{} {
-			t := &struct {
-				User_id int `json:"user_id"`
-				table.UserInfo
-			}{}
+		np.OnEvent("getUserInfo", func(so socketio.Socket, user_id int) *table.UserInfo {
+			t := &table.UserInfo{}
 			userService.GetUserInfo(user_id).Scan(&t)
 			return t
 		})
@@ -175,7 +147,7 @@ func getWs() *socketio.Server {
 		})
 
 		np.OnEvent("robotChat", func(so socketio.Socket, data struct {
-			User_id   int
+			UserID    int
 			ToGroupId string
 			Message   string
 		}) map[string]interface{} {
@@ -183,7 +155,7 @@ func getWs() *socketio.Server {
 			resp, err := req.Post("http://www.tuling123.com/openapi/api", map[string]interface{}{
 				"key":    "4e348b4a62ca43b5870b16dc58fbcc93",
 				"info":   data.Message,
-				"userid": data.User_id,
+				"userid": data.UserID,
 			})
 			d, err := resp.Body()
 			s := string(d)
@@ -226,4 +198,15 @@ func attachmentsTOJsonStr(attachments interface{}) string {
 		return "[]"
 	}
 	return string(byte)
+}
+
+func getTokenData(prefix, token string) (*jwt.Claims, error) {
+	_prefix := "getTokenData "
+	data, err := jwt.Singleton.TokenParse(token)
+	if err != nil {
+		logrus.Errorln(prefix+_prefix+"失败", err, token)
+	} else {
+		logrus.Infoln(prefix+_prefix+"成功", token)
+	}
+	return data, err
 }

@@ -16,8 +16,10 @@ require (
 	github.com/pschlump/MiscLib v1.0.0
 	github.com/pschlump/godebug v1.0.0
 	github.com/pschlump/json v1.12.0 // indirect
+	github.com/shopspring/decimal v0.0.0-20191130220710-360f2bc03045
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.6.1
 	github.com/tinylib/msgp v1.1.0
 	github.com/zyxar/socketio v0.0.0-20191115190247-6db68ec83b9b
+	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2
 )

@@ -17,6 +17,7 @@ func Cros(c *gin.Context) {
 	c.Request.Header.Del("Origin")
 	if c.Request.Method == "OPTIONS" {
 		c.Status(204)
+		c.Abort()
 	}
 }
 
@@ -25,12 +26,10 @@ func Auth(c *gin.Context) {
 	if token == "" {
 		SendErr(errors.New("token 不存在"), c)
 	}
-	claims, err := jwt.Jwt.TokenParse(token)
+	_, err := jwt.Singleton.TokenParse(token)
 	if err != nil {
-		c.Set("token", nil)
 		SendErr(err, c)
 	}
-	c.Set("token", claims)
 }
 
 // 有错时 返回 true

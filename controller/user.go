@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"gin/lib"
+	"fmt"
+	"gin/lib/convert"
 	"gin/lib/jwt"
 	"gin/model/request"
 	"gin/model/response"
@@ -67,11 +68,9 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 		return
 	}
 
-	if user.Password == lib.Str_Md5(param.Password) {
+	if user.Password == convert.StrToMd5(param.Password) {
 		res.Success = true
-		token, err := jwt.Jwt.TokenCreate(jwt.PlayLoad{
-			"user": user,
-		})
+		token, err := jwt.Singleton.TokenCreate(fmt.Sprint( user.ID))
 		if err != nil {
 			res.Success = false
 			res.Msg = err.Error()

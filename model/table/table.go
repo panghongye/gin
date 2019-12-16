@@ -1,56 +1,33 @@
 package table
 
+import "time"
+
 type UserInfo struct {
-	ID        int    `gorm:"primary_key" json:"id"`
-	Github_id int    `json:"github_id"`
-	Name      string `json:"name" gorm:"unique;not null"`
-	Password  string `json:"-"`
-	Avatar    string `json:"avatar"`
-	Location  string `json:"location"`
-	Socketid  string `json:"socketid"`
-	Website   string `json:"website"`
-	Github    string `json:"github"`
-	Intro     string `json:"intro"`
-	Company   string `json:"company"`
+	ID       int    `gorm:"primary_key" json:"id"`
+	Name     string `gorm:"unique;not null" json:"name"`
+	Password string `json:"-"`
+	Intro    string `json:"intro"`
 }
 
 type GroupInfo struct {
-	ID           int    `gorm:"primary_key" json:"id"`
-	To_group_id  string `json:"to_group_id"`
-	Name         string `json:"name"`
-	Group_notice string `json:"group_notice"`
-	Creator_id   int    `json:"creator_id"`
-	Create_time  int    `json:"create_time"`
+	ID          string    `gorm:"primary_key" json:"id"`
+	Name        string    `json:"name"`
+	GroupNotice string    `json:"groupNotice"`
+	FromUser    int       `json:"fromUser"`
+	CreateTime  time.Time `json:"createTime"`
 }
 
-type User_user_relation struct {
-	ID        int    `gorm:"primary_key" json:"id"`
-	User_id   int    `json:"user_id"`
-	From_user int    `json:"from_user"`
-	Remark    string `json:"remark"`
-	Shield    uint64 `json:"shield"`
-	Time      int    `json:"time"`
-}
-type Group_msg struct {
-	ID          int    `gorm:"primary_key" json:"id"`
-	From_user   int    `json:"from_user"`
-	To_group_id string `json:"to_group_id"`
-	Message     string `json:"message"`
-	Time        int    `json:"time"`
-	Attachments string `json:"attachments" gorm:"type:json" `
+type GroupMsg struct {
+	ID          int       `gorm:"primary_key" json:"id"`
+	FromUser    int       `json:"fromUser"`
+	GroupID     string    `json:"groupId"`
+	Message     string    `json:"message"`
+	Time        time.Time `json:"time"`
+	Attachments string    `gorm:"type:json" json:"attachments"`
 }
 
-type Private_msg struct {
-	ID          int    `gorm:"primary_key" json:"id"`
-	From_user   int    `json:"from_user"`
-	To_user     int    `json:"to_user"`
-	Message     string `json:"message"`
-	Time        int    `json:"time"`
-	Attachments string `json:"attachments" gorm:"type:json" `
-}
-
-type Group_user_relation struct {
-	ID          int    `gorm:"primary_key" json:"id"`
-	To_group_id string `json:"to_group_id"`
-	User_id     string `json:"user_id"`
+type GroupUserRelation struct {
+	ID      int    `gorm:"primary_key" json:"id"`
+	GroupID string `json:"groupId"`
+	UserID  int    `json:"userID"`
 }

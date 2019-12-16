@@ -14,7 +14,7 @@ func init() {
 
 	// log
 	log.SetFormatter(&log.JSONFormatter{})
-	// log.SetLevel(log.InfoLevel)
+	//log.SetLevel(log.InfoLevel)
 	// log.SetReportCaller(true)
 
 	//rl, _ := rotatelogs.New("log/app.%Y%m%d%H%M.log")

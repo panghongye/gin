@@ -23,10 +23,8 @@ func init() {
 	db.SingularTable(true) // 关闭复数表名，如果设置为true，`User`表的表名就会是`user`，而不是`users`
 	db.AutoMigrate(
 		new(table.UserInfo),
-		new(table.User_user_relation),
-		new(table.Group_msg),
 		new(table.GroupInfo),
-		new(table.Group_user_relation),
-		new(table.Private_msg),
+		new(table.GroupMsg),
+		new(table.GroupUserRelation),
 	)
 }
