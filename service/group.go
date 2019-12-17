@@ -16,9 +16,12 @@ func (GroupService) FuzzyMatchGroups(name string) []table.GroupInfo {
 	return t
 }
 
-func (GroupService) JoinGroup(user_id int, group_id string) *gorm.DB {
-	_sql := `INSERT INTO group_user_relation(user_id,group_id) VALUES(?,?);`
-	return db.Exec(_sql, user_id, group_id)
+func (GroupService) JoinGroup(groupID string, ToUserIDs ...int) *gorm.DB {
+	t := []table.GroupUserRelation{}
+	for _, id := range ToUserIDs {
+		t = append(t, table.GroupUserRelation{GroupID: groupID, UserID: id})
+	}
+	return db.Create(&t)
 }
 
 func (GroupService) IsInGroup(user_id int, group_id string) *gorm.DB {
