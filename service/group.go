@@ -9,19 +9,17 @@ import (
 
 type GroupService struct{}
 
-func (GroupService) FuzzyMatchGroups(name string) []table.GroupInfo {
+func (GroupService) FuzzyFindGroupsByName(name string) *[]table.GroupInfo {
 	t := []table.GroupInfo{}
 	sql := `SELECT * FROM group_info WHERE name LIKE ?;`
 	db.Raw(sql, name).Scan(&t)
-	return t
+	return &t
 }
 
-func (GroupService) JoinGroup(groupID string, ToUserIDs ...int) *gorm.DB {
-	t := []table.GroupUserRelation{}
-	for _, id := range ToUserIDs {
-		t = append(t, table.GroupUserRelation{GroupID: groupID, UserID: id})
+func (GroupService) JoinGroup(groupID string, UserIDs ...int) {
+	for _, id := range UserIDs {
+		db.Create(&table.GroupUserRelation{GroupID: groupID, UserID: id})
 	}
-	return db.Create(&t)
 }
 
 func (GroupService) IsInGroup(user_id int, group_id string) *gorm.DB {

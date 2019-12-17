@@ -46,14 +46,14 @@ func getWs() *socketio.Server {
 
 		np.OnEvent("init", func(so socketio.Socket, param Param) response.Response {
 			prefix := "【ws init】"
-			token, err := getTokenData(prefix, param.Token)
-			if err != nil {
-				return response.Response{Msg: err.Error(), Success: false}
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 
 			var t table.UserInfo
-			userService.GetUserInfo(convert.StringToInt(token.PlayLoad)).Scan(&t)
-			return response.Response{Success: true, Data: t}
+			userService.FindUserByID(userID).Scan(&t)
+			return response.Response{Data: t}
 			// todo 获取消息列表
 
 		})
@@ -72,28 +72,54 @@ func getWs() *socketio.Server {
 			return data
 		})
 
-		np.OnEvent("newGroup", func(so socketio.Socket, data struct {
+		np.OnEvent("newGroup", func(so socketio.Socket, param struct {
+			Param
 			Name        string `json:"name"`
 			GroupNotice string `json:"groupNotice"`
-			UserId      int    `json:"userID"`
 			GroupID     string `json:"groupId"`
-			CreateTime  int    `json:"createTime"`
-		}) interface{} {
-			data.GroupID = convert.RandomString(20)
-			groupService.CreateGroup(data.Name, data.GroupNotice, data.GroupID, data.UserId)
-			groupService.JoinGroup(data.UserId, data.GroupID)
-			so.Join(data.GroupID)
-			return data
+		}) response.Response {
+			prefix := "【newGroup】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			param.GroupID = convert.RandomString(20)
+			groupService.CreateGroup(param.Name, param.GroupNotice, param.GroupID, userID)
+			groupService.JoinGroup(param.GroupID, userID)
+			so.Join(param.GroupID)
+			return response.Response{Data: param}
 		})
 
-		np.OnEvent("newContact", func(so socketio.Socket, data struct {
-			UserId int `json:"userID"`
-		}) interface{} {
-			// data.GroupID = lib.GetRandomString(90)
-			// groupService.CreateGroup(data.Name, data.GroupNotice, data.GroupID, data.UserId)
-			// groupService.JoinGroup(data.UserId, data.GroupID)
-			// so.Join(data.GroupID)
-			return data
+		np.OnEvent("newContact", func(so socketio.Socket, param struct {
+			Param
+			GroupID  string `json:"groupID"`
+			ToUserID int    `json:"toUserID"`
+		}) response.Response {
+			prefix := "【newContact】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			param.GroupID = convert.RandomString(20)
+			groupService.CreateGroup("", "", param.GroupID, userID)
+			groupService.JoinGroup(param.GroupID, userID, param.ToUserID, param.ToUserID)
+			so.Join(param.GroupID)
+			return response.Response{Data: param}
+		})
+
+		np.OnEvent("search", func(so socketio.Socket, param struct {
+			Param
+			Search string
+		}) response.Response {
+			prefix := "【search】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			data := map[string]interface{}{}
+			data["users"] = userService.FuzzyFindUsersByName(param.Search)
+			data["groups"] = groupService.FuzzyFindGroupsByName(param.Search)
+			return response.Response{Data: data}
 		})
 
 		np.OnEvent("updateGroupInfo", func(so socketio.Socket, data struct {
@@ -119,32 +145,12 @@ func getWs() *socketio.Server {
 			groupService.LeaveGroup(data.UserID, data.GroupID)
 		})
 
-		np.OnEvent("getUserInfo", func(so socketio.Socket, user_id int) *table.UserInfo {
+		np.OnEvent("FindUserByID", func(so socketio.Socket, user_id int) *table.UserInfo {
 			t := &table.UserInfo{}
-			userService.GetUserInfo(user_id).Scan(&t)
+			userService.FindUserByID(user_id).Scan(&t)
 			return t
 		})
 
-		np.OnEvent("fuzzyMatch", func(so socketio.Socket, data struct {
-			Field      string `json:"field"`
-			SearchUser bool   `json:"searchUser"`
-		}) map[string]interface{} {
-			var fuzzyMatchResult interface{}
-			data.Field = "%" + data.Field + "%"
-			if data.SearchUser {
-				fuzzyMatchResult = userService.FuzzyMatchUsers(data.Field)
-				logrus.Info()
-			} else {
-				fuzzyMatchResult = groupService.FuzzyMatchGroups(data.Field)
-				logrus.Info()
-			}
-
-			return map[string]interface{}{
-				"fuzzyMatchResult": fuzzyMatchResult,
-				"searchUser":       data.SearchUser,
-			}
-
-		})
 
 		np.OnEvent("robotChat", func(so socketio.Socket, data struct {
 			UserID    int
@@ -209,4 +215,12 @@ func getTokenData(prefix, token string) (*jwt.Claims, error) {
 		logrus.Infoln(prefix+_prefix+"成功", token)
 	}
 	return data, err
+}
+
+func getTokenDataID(prefix, token string) int {
+	data, err := getTokenData(prefix, token)
+	if err != nil {
+		return 0
+	}
+	return convert.StringToInt(data.PlayLoad)
 }

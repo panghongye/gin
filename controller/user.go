@@ -27,24 +27,22 @@ func (this UserCtrl) Register(ctx *gin.Context) {
 	if err := ctx.ShouldBind(param); err != nil {
 		logrus.Info("注册参数错误: ", err)
 		res.Msg = "注册参数错误"
-		res.Success = false
+		res.Code = response.ParamErr.Code
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
-	if t := userService.FindDataByName(param.Name); t.ID != 0 {
+	if t := userService.FindUsersByName(param.Name); t.ID != 0 {
 		res.Msg = "用户已存在"
-		res.Success = false
+		res.Code = response.ParamErr.Code
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
 	if t := userService.InsertData(&table.UserInfo{Name: param.Name, Password: param.Password}); t.ID == 0 {
 		res.Msg = "注册失败"
-		res.Success = false
 	} else {
 		res.Msg = "注册成功"
-		res.Success = true
 	}
 	ctx.JSON(http.StatusOK, res)
 }
@@ -55,33 +53,33 @@ func (this UserCtrl) Login(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&param); err != nil {
 		logrus.Info("登录参数错误: ", err)
 		res.Msg = "登录参数错误"
-		res.Success = false
+		res.Code = response.ParamErr.Code
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
-	user := userService.FindDataByName(param.Name)
+	user := userService.FindUsersByName(param.Name)
 	if user.ID == 0 {
 		res.Msg = "用户不存在"
-		res.Success = false
+		res.Code = response.ParamErr.Code
 		ctx.JSON(http.StatusOK, res)
 		return
 	}
 
 	if user.Password == convert.StrToMd5(param.Password) {
-		res.Success = true
-		token, err := jwt.Singleton.TokenCreate(fmt.Sprint( user.ID))
+		token, err := jwt.Singleton.TokenCreate(fmt.Sprint(user.ID))
 		if err != nil {
-			res.Success = false
+			res.Code = response.ParamErr.Code
 			res.Msg = err.Error()
 		}
 		res.Data = struct {
 			table.UserInfo
 			Token string `json:"token"`
-		}{*user, token}
+		}{user, token}
 	} else {
-		res.Success = false
 		res.Msg = "密码不正确"
+		res.Code = response.ParamErr.Code
+
 	}
 	ctx.JSON(http.StatusOK, res)
 }

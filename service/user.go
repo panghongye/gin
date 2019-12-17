@@ -37,13 +37,19 @@ func (UserService) UpdateGithubUser(name, avatar, location, website, github, int
 	return db.Raw(_sql, name, avatar, location, website, github, intro, company, github_id)
 }
 
-func (this UserService) FindDataByName(name string) *table.UserInfo {
+func (this UserService) FindUsersByName(name string) table.UserInfo {
 	t := new(table.UserInfo)
 	db.Where("name = ?", name).First(t)
-	return t
+	return *t
 }
 
-func (UserService) GetUserInfo(user_id int) *gorm.DB {
+func (this UserService) FuzzyFindUsersByName(name string) []table.UserInfo {
+	t := new([]table.UserInfo)
+	db.Where("name LIKE ?", "%"+name+"%").Find(t)
+	return *t
+}
+
+func (UserService) FindUserByID(user_id int) *gorm.DB {
 	_sql := `SELECT id, name,  intro FROM user_info WHERE id =? `
 	return db.Raw(_sql, user_id)
 }
