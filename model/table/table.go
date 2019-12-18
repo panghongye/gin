@@ -10,11 +10,11 @@ type UserInfo struct {
 }
 
 type GroupInfo struct {
-	ID          string    `gorm:"primary_key" json:"id"`
-	Name        string    `json:"name"`
-	GroupNotice string    `json:"groupNotice"`
-	FromUser    int       `json:"fromUser"`
-	CreateTime  time.Time `json:"createTime"`
+	ID         string    `gorm:"primary_key" json:"id"`
+	Name       string    `json:"name"`
+	Intro      string    `json:"intro"`
+	FromUser   int       `json:"fromUser"`
+	CreateTime time.Time `json:"createTime"`
 }
 
 type GroupMsg struct {

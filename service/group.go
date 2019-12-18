@@ -16,6 +16,12 @@ func (GroupService) FuzzyFindGroupsByName(name string) *[]table.GroupInfo {
 	return &t
 }
 
+func (GroupService) FindGroupByID(id string) table.GroupInfo {
+	t := table.GroupInfo{ID: id}
+	db.First(&t)
+	return t
+}
+
 func (GroupService) JoinGroup(groupID string, UserIDs ...int) {
 	for _, id := range UserIDs {
 		db.Create(&table.GroupUserRelation{GroupID: groupID, UserID: id})

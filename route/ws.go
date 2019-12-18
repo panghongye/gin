@@ -58,6 +58,36 @@ func getWs() *socketio.Server {
 
 		})
 
+		np.OnEvent("getUserInfo", func(so socketio.Socket, param struct {
+			Param
+			ID int
+		}) response.Response {
+			prefix := "【ws getUserInfo】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			t := new(table.UserInfo)
+			userService.FindUserByID(param.ID).Scan(t)
+			return response.Response{Data: t}
+		})
+
+		np.OnEvent("getGroupInfo", func(so socketio.Socket, param struct {
+			Param
+			ID string
+		}) response.Response {
+			prefix := "【ws getGroupInfo】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			t := groupService.FindGroupByID(param.ID)
+			if t.ID != "" {
+				return response.Response{Data: t}
+			}
+			return response.Response{}
+		})
+
 		np.OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
 			FromUser    int           `json:"from_user"`
 			GroupID     string        `json:"groupId"`
@@ -74,9 +104,9 @@ func getWs() *socketio.Server {
 
 		np.OnEvent("newGroup", func(so socketio.Socket, param struct {
 			Param
-			Name        string `json:"name"`
-			GroupNotice string `json:"groupNotice"`
-			GroupID     string `json:"groupId"`
+			Name    string `json:"name"`
+			Intro   string `json:"intro"`
+			GroupID string `json:"groupId"`
 		}) response.Response {
 			prefix := "【newGroup】"
 			userID := getTokenDataID(prefix, param.Token)
@@ -84,7 +114,7 @@ func getWs() *socketio.Server {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 			param.GroupID = convert.RandomString(20)
-			groupService.CreateGroup(param.Name, param.GroupNotice, param.GroupID, userID)
+			groupService.CreateGroup(param.Name, param.Intro, param.GroupID, userID)
 			groupService.JoinGroup(param.GroupID, userID)
 			so.Join(param.GroupID)
 			return response.Response{Data: param}
@@ -123,11 +153,11 @@ func getWs() *socketio.Server {
 		})
 
 		np.OnEvent("updateGroupInfo", func(so socketio.Socket, data struct {
-			Name        string `json:"name"`
-			GroupNotice string `json:"group_notice"`
-			GroupID     string `json:"groupId"`
+			Name    string `json:"name"`
+			Intro   string `json:"intro"`
+			GroupID string `json:"groupId"`
 		}) string {
-			groupService.UpdateGroupInfo(data.Name, data.GroupNotice, data.GroupID)
+			groupService.UpdateGroupInfo(data.Name, data.Intro, data.GroupID)
 			return "修改群资料成功"
 		})
 
@@ -150,7 +180,6 @@ func getWs() *socketio.Server {
 			userService.FindUserByID(user_id).Scan(&t)
 			return t
 		})
-
 
 		np.OnEvent("robotChat", func(so socketio.Socket, data struct {
 			UserID    int
