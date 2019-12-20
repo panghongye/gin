@@ -74,11 +74,11 @@ func (UserService) DeleteContact(user_id, from_user int) *gorm.DB {
 
 // 通过user_id查找首页群列表
 func (UserService) GetGroupList(user_id int) *gorm.DB {
-	var _sql = `SELECT r.groupId ,i.name , i.create_time,
-      (SELECT g.message  FROM group_msg AS g  WHERE g.groupId = r.groupId  ORDER BY TIME DESC   LIMIT 1 )  AS message ,
-      (SELECT g.time  FROM group_msg AS g  WHERE g.groupId = r.groupId  ORDER BY TIME DESC   LIMIT 1 )  AS time,
-      (SELECT g.attachments FROM group_msg AS g  WHERE g.groupId = r.groupId  ORDER BY TIME DESC   LIMIT 1 )  AS attachments
-      FROM  group_user_relation AS r inner join group_info AS i on r.groupId = i.groupId WHERE r.user_id = ? ;`
+	var _sql = `SELECT r.groupID ,i.name , i.create_time,
+      (SELECT g.message  FROM group_msg AS g  WHERE g.groupID = r.groupID  ORDER BY TIME DESC   LIMIT 1 )  AS message ,
+      (SELECT g.time  FROM group_msg AS g  WHERE g.groupID = r.groupID  ORDER BY TIME DESC   LIMIT 1 )  AS time,
+      (SELECT g.attachments FROM group_msg AS g  WHERE g.groupID = r.groupID  ORDER BY TIME DESC   LIMIT 1 )  AS attachments
+      FROM  group_user_relation AS r inner join group_info AS i on r.groupID = i.groupID WHERE r.user_id = ? ;`
 	return db.Raw(_sql, user_id)
 }
 

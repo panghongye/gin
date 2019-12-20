@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	userService  service.UserService
-	groupService service.GroupService
+	userService     service.UserService
+	groupService    service.GroupService
+	groupMsgService service.GroupMsgService
 )
 
 type Param struct {
@@ -70,7 +71,8 @@ func getWs() *socketio.Server {
 			groups := []Group{} //群组及消息
 			for _, item := range groupService.FindGroupsByUserID(userID) {
 				so.Join(item.ID)
-				groups = append(groups, Group{item, groupService.FindGroupMsgByGroupID(item.ID, 0, 20)})
+				msg := groupService.FindGroupMsgByGroupID(item.ID, 0, 20)
+				groups = append(groups, Group{item, msg})
 			}
 			return response.Response{Data: map[string]interface{}{
 				"groups": groups,
@@ -99,7 +101,7 @@ func getWs() *socketio.Server {
 			Param
 			Name    string `json:"name"`
 			Intro   string `json:"intro"`
-			GroupID string `json:"groupId"`
+			GroupID string `json:"groupID"`
 		}) response.Response {
 			prefix := "【newGroup】"
 			userID := getTokenDataID(prefix, param.Token)
@@ -137,24 +139,32 @@ func getWs() *socketio.Server {
 			groupService.LeaveGroup(data.UserID, data.GroupID)
 		})
 
-		np.OnEvent("sendGroupMsg", func(so socketio.Socket, data struct {
-			FromUser    int           `json:"from_user"`
-			GroupID     string        `json:"groupId"`
+		np.OnEvent("sendGroupMsg", func(so socketio.Socket, param struct {
+			Param
+			GroupID     string        `json:"groupID"`
 			Time        time.Time     `json:"time"`
-			Message     string        `json:"message"`
+			Msg         string        `json:"msg"`
 			Name        string        `json:"name"`
 			Attachments []interface{} `json:"attachments"`
-		}) interface{} {
-			data.Time = time.Now()
-			// groupChatService.SaveGroupMsg(data.FromUser, data.GroupID, data.Message, attachmentsTOJsonStr(data.Attachments))
-			so.BroadcastToRoom(data.GroupID, "getGroupMsg", data)
-			return data
+		}) response.Response {
+			prefix := "【ws sendGroupMsg】"
+			userID := getTokenDataID(prefix, param.Token)
+			if userID == 0 {
+				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
+			}
+			msg := struct {
+				Name string `json:"name"`
+				table.GroupMsg
+			}{param.Name, groupMsgService.SaveGroupMsg(userID, param.GroupID, param.Msg, attachmentsTOJsonStr(param.Attachments))}
+
+			so.BroadcastToRoom(param.GroupID, "getGroupMsg", response.Response{Data: msg})
+			return response.Response{Data: msg}
 		})
 
 		np.OnEvent("updateGroupInfo", func(so socketio.Socket, data struct {
 			Name    string `json:"name"`
 			Intro   string `json:"intro"`
-			GroupID string `json:"groupId"`
+			GroupID string `json:"groupID"`
 		}) string {
 			groupService.UpdateGroupInfo(data.Name, data.Intro, data.GroupID)
 			return "修改群资料成功"

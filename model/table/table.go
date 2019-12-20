@@ -20,14 +20,14 @@ type GroupInfo struct {
 type GroupMsg struct {
 	ID          int       `gorm:"primary_key" json:"id"`
 	FromUser    int       `json:"fromUser"`
-	GroupID     string    `json:"groupId"`
-	Msg         string    `json:"message"`
+	GroupID     string    `json:"groupID"`
+	Msg         string    `json:"msg"`
 	Time        time.Time `json:"time"`
 	Attachments string    `gorm:"type:json" json:"attachments"`
 }
 
 type GroupUserRelation struct {
 	ID      int    `gorm:"primary_key" json:"id"`
-	GroupID string `gorm:"UNIQUE_INDEX:GroupUser" json:"groupId"`
+	GroupID string `gorm:"UNIQUE_INDEX:GroupUser" json:"groupID"`
 	UserID  int    `gorm:"UNIQUE_INDEX:GroupUser" json:"userID"`
 }

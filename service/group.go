@@ -30,8 +30,9 @@ func (GroupService) FindGroupsByUserID(useID int) []table.GroupInfo {
 }
 
 func (GroupService) FindGroupMsgByGroupID(groupID string, page, pageSize int) []table.GroupMsg {
-	t := []table.GroupMsg{}
-	db.Raw(`SELECT * FROM group_msg WHERE group_id='?' ORDER BY id DESC LIMIT ?,?`, groupID, (page-1)*pageSize, pageSize).Scan(&t)
+	pageParam(&page, &pageSize)
+	t := []table.GroupMsg{} // LIMIT ?,?  (page-1)*pageSize, pageSize
+	db.Raw(`SELECT * FROM group_msg WHERE group_id=? ORDER BY id DESC `, groupID).Scan(&t)
 	return t
 }
 
@@ -62,4 +63,14 @@ func (GroupService) UpdateGroupInfo(name, Intro string, group_id string) *gorm.D
 func (GroupService) LeaveGroup(user_id, group_id string) *gorm.DB {
 	var _sql = `DELETE FROM group_user_relation WHERE user_id = ? AND group_id = ? ;`
 	return db.Exec(_sql, user_id, group_id)
+}
+
+func pageParam(page *int, pageSize *int) {
+	if *page < 1 {
+		*page = 1
+	}
+
+	if *pageSize < 1 {
+		*pageSize = 1
+	}
 }
