@@ -95,6 +95,11 @@ func (s *socket) BroadcastToRoom(room string, event string, args ...interface{})
 	s.server.BroadcastToRoom(room, event, args...)
 }
 
+// EmitTo 定向
+func (s *socket) EmitTo(sid string, event string, args ...interface{}) {
+	s.server.EmitTo(sid, event, args...)
+}
+
 func newSocket(ß *engine.Socket, parser Parser) *socket {
 	return &socket{
 		ß:       ß,

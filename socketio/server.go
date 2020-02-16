@@ -198,13 +198,27 @@ func (s *Server) BroadcastToRoom(room string, event string, args ...interface{})
 		if sid == "" || so == nil {
 			continue
 		}
-
 		if err := so.Emit(event, args...); err != nil {
 			logrus.Error("[BroadcastToRoom] sid="+sid+", ", err, " ,args=", args)
 			if err == ErrorNamespaceUnavaialble {
 				so.LeaveAll()
 				so.Close()
 			}
+		}
+	}
+}
+
+// EmitTo 定向
+func (s *Server) EmitTo(sid string, event string, args ...interface{}) {
+	if sid == "" {
+		return
+	}
+	for _, so := range s.sockets {
+		if sid == so.Sid() {
+			if err := so.Emit(event, args...); err != nil {
+				logrus.Error("[EmitTo] sid="+sid+", ", err, " ,args=", args)
+			}
+			break
 		}
 	}
 }

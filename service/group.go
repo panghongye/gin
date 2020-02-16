@@ -25,14 +25,15 @@ func (GroupService) FindGroupByID(id string) table.GroupInfo {
 //FindGroupsByUserID 获取用户所在群组
 func (GroupService) FindGroupsByUserID(useID int) []table.GroupInfo {
 	t := []table.GroupInfo{}
-	db.Raw(`SELECT * FROM group_info WHERE id in (SELECT group_id  FROM group_user_relation WHERE user_id=?)`, useID).Scan(&t)
+	db.Raw(`SELECT * FROM group_info WHERE id in (SELECT group_id  FROM group_user_relation WHERE user_id=?) ORDER BY create_time`, useID).Scan(&t)
 	return t
 }
 
 func (GroupService) FindGroupMsgByGroupID(groupID string, page, pageSize int) []table.GroupMsg {
 	pageParam(&page, &pageSize)
 	t := []table.GroupMsg{} // LIMIT ?,?  (page-1)*pageSize, pageSize
-	db.Raw(`SELECT * FROM group_msg WHERE group_id=? ORDER BY id DESC `, groupID).Scan(&t)
+	// db.Raw(`SELECT * FROM group_msg WHERE group_id=? ORDER BY id DESC `, groupID).Scan(&t)
+	db.Raw(`SELECT * FROM group_msg WHERE group_id=?  `, groupID).Scan(&t)
 	return t
 }
 

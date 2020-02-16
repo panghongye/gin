@@ -2,9 +2,11 @@ package route
 
 import (
 	"encoding/json"
+	"fmt"
 	"gin/lib"
 	"gin/lib/convert"
 	"gin/lib/jwt"
+	"gin/lib/redis"
 	"gin/model/response"
 	"gin/model/table"
 	"gin/service"
@@ -15,6 +17,7 @@ import (
 )
 
 var (
+	Redis           = redis.Redis
 	userService     service.UserService
 	groupService    service.GroupService
 	groupMsgService service.GroupMsgService
@@ -63,7 +66,8 @@ func getWs() *socketio.Server {
 			if userID == 0 {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
-			//TODO 每次连接时将 {userId:socketID}  存入 redis
+			// 每次连接时将 {userId:socketID}  存入 redis
+			Redis.Set(fmt.Sprint(userID), so.Sid(), 0)
 			type Group struct {
 				table.GroupInfo
 				Msgs []table.GroupMsg `json:"msgs"`
