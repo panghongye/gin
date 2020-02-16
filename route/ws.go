@@ -60,6 +60,7 @@ func getWs() *socketio.Server {
 			logrus.Info("【断开】<<", so.Sid(), so.Close())
 		})
 
+		// 初始化 获取消息
 		np.OnEvent("init", func(so socketio.Socket, param Param) response.Response {
 			prefix := "【ws init】"
 			userID := getTokenDataID(prefix, param.Token)
@@ -83,7 +84,7 @@ func getWs() *socketio.Server {
 			}}
 		})
 
-		np.OnEvent("newContact", func(so socketio.Socket, param struct {
+		np.OnEvent("newFriend", func(so socketio.Socket, param struct {
 			Param
 			GroupID  string `json:"groupID"`
 			ToUserID int    `json:"toUserID"`
@@ -94,6 +95,7 @@ func getWs() *socketio.Server {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 			param.GroupID = convert.RandomString(20)
+			// todo 
 			groupService.CreateGroup("", "", param.GroupID, userID)
 			groupService.JoinGroup(param.GroupID, userID, param.ToUserID)
 			so.Join(param.GroupID)

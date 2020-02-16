@@ -7,6 +7,7 @@ type UserInfo struct {
 	Name     string `gorm:"unique;not null" json:"name"`
 	Password string `json:"-"`
 	Intro    string `json:"intro"`
+	IsFriend int    `json:"isFriend"`
 }
 
 type GroupInfo struct {
