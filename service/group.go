@@ -29,11 +29,15 @@ func (GroupService) FindGroupsByUserID(useID int) []table.GroupInfo {
 	return t
 }
 
-func (GroupService) FindGroupMsgByGroupID(groupID string, page, pageSize int) []table.GroupMsg {
+type GroupMsg struct {
+	table.GroupMsg
+	UserName string `json:"userName"`
+}
+
+func (GroupService) FindGroupMsgByGroupID(groupID string, page, pageSize int) []GroupMsg {
 	pageParam(&page, &pageSize)
-	t := []table.GroupMsg{} // LIMIT ?,?  (page-1)*pageSize, pageSize
-	// db.Raw(`SELECT * FROM group_msg WHERE group_id=? ORDER BY id DESC `, groupID).Scan(&t)
-	db.Raw(`SELECT * FROM group_msg WHERE group_id=?  `, groupID).Scan(&t)
+	t := []GroupMsg{} // LIMIT ?,?  (page-1)*pageSize, pageSize
+	db.Raw(`SELECT G.*,U.name as user_name FROM group_msg AS G LEFT JOIN user_info AS U ON G.from_user=U.id WHERE group_id=?`, groupID).Scan(&t)
 	return t
 }
 

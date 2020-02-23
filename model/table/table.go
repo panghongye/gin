@@ -22,7 +22,7 @@ type GroupMsg struct {
 	ID          int       `gorm:"primary_key" json:"id"`
 	FromUser    int       `json:"fromUser"`
 	GroupID     string    `json:"groupID"`
-	Msg         string    `json:"msg"`
+	Msg         string    `gorm:"Type:text" json:"msg"`
 	Time        time.Time `json:"time"`
 	Attachments string    `gorm:"type:json" json:"attachments"`
 }

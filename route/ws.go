@@ -71,7 +71,7 @@ func getWs() *socketio.Server {
 			Redis.Set(fmt.Sprint(userID), so.Sid(), 0)
 			type Group struct {
 				table.GroupInfo
-				Msgs []table.GroupMsg `json:"msgs"`
+				Msgs []service.GroupMsg `json:"msgs"`
 			}
 			groups := []Group{} //群组及消息
 			for _, item := range groupService.FindGroupsByUserID(userID) {
@@ -151,7 +151,7 @@ func getWs() *socketio.Server {
 			GroupID     string        `json:"groupID"`
 			Time        time.Time     `json:"time"`
 			Msg         string        `json:"msg"`
-			Name        string        `json:"name"`
+			UserName        string        `json:"userName"`
 			Attachments []interface{} `json:"attachments"`
 		}) response.Response {
 			prefix := "【ws sendGroupMsg】"
@@ -160,9 +160,9 @@ func getWs() *socketio.Server {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 			msg := struct {
-				Name string `json:"name"`
+				UserName string `json:"userName"`
 				table.GroupMsg
-			}{param.Name, groupMsgService.SaveGroupMsg(userID, param.GroupID, param.Msg, attachmentsTOJsonStr(param.Attachments))}
+			}{param.UserName, groupMsgService.SaveGroupMsg(userID, param.GroupID, param.Msg, attachmentsTOJsonStr(param.Attachments))}
 
 			so.BroadcastToRoom(param.GroupID, "getGroupMsg", response.Response{Data: msg})
 			return response.Response{Data: msg}
