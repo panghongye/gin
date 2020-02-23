@@ -30,6 +30,7 @@ type Socket interface {
 	Leave(room string)
 	LeaveAll()
 	BroadcastToRoom(room string, event string, args ...interface{})
+	EmitTo(sid string, event string, args ...interface{})
 }
 
 type nspSock struct {

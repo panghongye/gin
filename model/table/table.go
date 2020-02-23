@@ -7,7 +7,6 @@ type UserInfo struct {
 	Name     string `gorm:"unique;not null" json:"name"`
 	Password string `json:"-"`
 	Intro    string `json:"intro"`
-	IsFriend int    `json:"isFriend"`
 }
 
 type GroupInfo struct {
@@ -16,6 +15,7 @@ type GroupInfo struct {
 	Intro      string    `json:"intro"`
 	FromUser   int       `json:"fromUser"`
 	CreateTime time.Time `json:"createTime"`
+	IsFriend   int       `gorm:"DEFAULT:0" json:"isFriend"`
 }
 
 type GroupMsg struct {

@@ -48,10 +48,10 @@ func (GroupService) IsInGroup(user_id int, group_id string) *gorm.DB {
 	return db.Raw(_sql, user_id, group_id)
 }
 
-func (GroupService) CreateGroup(name, Intro, group_id string, from_user int) *gorm.DB {
+func (GroupService) CreateGroup(name, Intro, group_id string, from_user int, is_friend int) *gorm.DB {
 	_sql :=
-		`INSERT INTO group_info (id,name,Intro,from_user,create_time) VALUES (?,?,?,?,?)`
-	return db.Exec(_sql, group_id, name, Intro, from_user, time.Now())
+		`INSERT INTO group_info (id,name,Intro,from_user,create_time,is_friend) VALUES (?,?,?,?,?,?)`
+	return db.Exec(_sql, group_id, name, Intro, from_user, time.Now(), is_friend)
 }
 
 // 更新群信息

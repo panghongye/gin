@@ -95,11 +95,12 @@ func getWs() *socketio.Server {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 			param.GroupID = convert.RandomString(20)
-			// todo 
-			groupService.CreateGroup("", "", param.GroupID, userID)
+			groupService.CreateGroup("0", "0", param.GroupID, userID, 1)
 			groupService.JoinGroup(param.GroupID, userID, param.ToUserID)
 			so.Join(param.GroupID)
-			//todo redis[ToUserID].Join(param.GroupID)
+			sid := Redis.Get(fmt.Sprint(param.ToUserID)).Val()
+			// 向对方广播init 重新获取群组列表
+			so.EmitTo(sid, "init")
 			return response.Response{Data: param}
 		})
 
@@ -115,7 +116,7 @@ func getWs() *socketio.Server {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
 			param.GroupID = convert.RandomString(20)
-			groupService.CreateGroup(param.Name, param.Intro, param.GroupID, userID)
+			groupService.CreateGroup(param.Name, param.Intro, param.GroupID, userID, 0)
 			groupService.JoinGroup(param.GroupID, userID)
 			so.Join(param.GroupID)
 			return response.Response{Data: param}
