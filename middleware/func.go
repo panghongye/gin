@@ -38,7 +38,7 @@ func SendErr(err error, c *gin.Context) bool {
 		return false
 	}
 	logrus.Error("SendErr ", err)
-	c.JSON(200, response.Response{
+	c.JSON(400, response.Response{
 		Msg: err.Error(),
 	})
 	c.Abort()

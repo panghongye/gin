@@ -94,6 +94,7 @@ func getWs() *socketio.Server {
 			if userID == 0 {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
+			// todo 群组重复检查
 			param.GroupID = convert.RandomString(20)
 			groupService.CreateGroup("0", "0", param.GroupID, userID, 1)
 			groupService.JoinGroup(param.GroupID, userID, param.ToUserID)
