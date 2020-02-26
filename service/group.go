@@ -47,7 +47,6 @@ func (GroupService) JoinGroup(groupID string, UserIDs ...int) {
 	}
 }
 
-
 func (GroupService) CreateGroup(name, Intro, group_id string, from_user int, is_friend int) *gorm.DB {
 	_sql :=
 		`INSERT INTO group_info (id,name,Intro,from_user,create_time,is_friend) VALUES (?,?,?,?,?,?)`
@@ -62,7 +61,7 @@ func (GroupService) UpdateGroupInfo(name, Intro string, group_id string) *gorm.D
 
 // 退群
 func (GroupService) LeaveGroup(user_id, group_id string) *gorm.DB {
-	var _sql = `DELETE FROM group_user_relation WHERE user_id = ? AND group_id = ? ;`
+	var _sql = `DELETE FROM group_user_relation WHERE user_id = ? AND group_id = ? `
 	return db.Exec(_sql, user_id, group_id)
 }
 
@@ -74,4 +73,12 @@ func pageParam(page *int, pageSize *int) {
 	if *pageSize < 1 {
 		*pageSize = 1
 	}
+}
+
+// 根据用户和好友群组查找好友名称
+func (GroupService) FindFriendNameByGroupUser(group_id string, user_id int) string {
+	t := table.UserInfo{}
+	sql := `SELECT name FROM user_info WHERE id IN (SELECT user_id FROM group_user_relation WHERE group_id=? AND user_id !=?)`
+	db.Raw(sql, group_id, user_id).Scan(&t)
+	return t.Name
 }

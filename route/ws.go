@@ -11,6 +11,7 @@ import (
 	"gin/model/table"
 	"gin/service"
 	"gin/socketio"
+	"sort"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -22,6 +23,12 @@ var (
 	groupService    service.GroupService
 	groupMsgService service.GroupMsgService
 )
+
+type IntList []int
+
+func (s IntList) Len() int           { return len(s) }
+func (s IntList) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s IntList) Less(i, j int) bool { return s[i] < s[j] }
 
 type Param struct {
 	Token string `json:"token"`
@@ -74,10 +81,14 @@ func getWs() *socketio.Server {
 				Msgs []service.GroupMsg `json:"msgs"`
 			}
 			groups := []Group{} //群组及消息
-			for _, item := range groupService.FindGroupsByUserID(userID) {
-				so.Join(item.ID)
-				msg := groupService.FindGroupMsgByGroupID(item.ID, 0, 20)
-				groups = append(groups, Group{item, msg})
+			for _, group := range groupService.FindGroupsByUserID(userID) {
+				so.Join(group.ID)
+				msg := groupService.FindGroupMsgByGroupID(group.ID, 0, 20)
+				if group.IsFriend == 1 {
+					group.Name = groupService.FindFriendNameByGroupUser(group.ID, userID)
+
+				}
+				groups = append(groups, Group{group, msg})
 			}
 			return response.Response{Data: map[string]interface{}{
 				"groups": groups,
@@ -89,14 +100,15 @@ func getWs() *socketio.Server {
 			GroupID  string `json:"groupID"`
 			ToUserID int    `json:"toUserID"`
 		}) response.Response {
-			prefix := "【newContact】"
+			prefix := "【newFriend】"
 			userID := getTokenDataID(prefix, param.Token)
 			if userID == 0 {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
-			// todo 群组重复检查
-			param.GroupID = convert.RandomString(20)
-			groupService.CreateGroup("0", "0", param.GroupID, userID, 1)
+			a := []int{param.ToUserID, userID}
+			sort.Sort(IntList(a))
+			param.GroupID = fmt.Sprint(a[0]) + "," + fmt.Sprint(a[1])
+			groupService.CreateGroup(param.GroupID, param.GroupID, param.GroupID, userID, 1)
 			groupService.JoinGroup(param.GroupID, userID, param.ToUserID)
 			so.Join(param.GroupID)
 			sid := Redis.Get(fmt.Sprint(param.ToUserID)).Val()
@@ -152,7 +164,7 @@ func getWs() *socketio.Server {
 			GroupID     string        `json:"groupID"`
 			Time        time.Time     `json:"time"`
 			Msg         string        `json:"msg"`
-			UserName        string        `json:"userName"`
+			UserName    string        `json:"userName"`
 			Attachments []interface{} `json:"attachments"`
 		}) response.Response {
 			prefix := "【ws sendGroupMsg】"
