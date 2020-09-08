@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 func init() {
 	var err error
 	// db, err = gorm.Open("sqlite3", "./test.db")
-	db, err = gorm.Open("mysql", "root:rootroot@tcp(127.0.0.1:3306)/ghchat?charset=utf8&parseTime=True&loc=Local")
+	db, err = gorm.Open("mysql", viper.GetString("db.connStr"))
 	if err != nil {
 		panic(err.Error())
 	}

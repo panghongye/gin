@@ -105,8 +105,8 @@ func getWs() *socketio.Server {
 			if userID == 0 {
 				return response.Response{Code: response.TokenErr.Code, Msg: response.TokenErr.Msg}
 			}
-			a := []int{param.ToUserID, userID}
-			sort.Sort(IntList(a))
+			a := IntList{param.ToUserID, userID}
+			sort.Sort(a)
 			param.GroupID = fmt.Sprint(a[0]) + "," + fmt.Sprint(a[1])
 			groupService.CreateGroup(param.GroupID, param.GroupID, param.GroupID, userID, 1)
 			groupService.JoinGroup(param.GroupID, userID, param.ToUserID)
