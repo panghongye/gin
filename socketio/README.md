@@ -44,16 +44,16 @@ func main() {
 	server, _ := socketio.NewServer(time.Second*25, time.Second*5, socketio.DefaultParser)
 	server.Namespace("/").
 		OnConnect(func(so socketio.Socket) {
-			logrus.Info("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
+			log.Println("connected:", so.RemoteAddr(), so.Sid(), so.Namespace())
 		}).
 		OnDisconnect(func(so socketio.Socket) {
 			log.Printf("%v %v %q disconnected", so.Sid(), so.RemoteAddr(), so.Namespace())
 		}).
 		OnError(func(so socketio.Socket, err ...interface{}) {
-			logrus.Info("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
+			log.Println("socket", so.Sid(), so.RemoteAddr(), so.Namespace(), "error:", err)
 		}).
 		OnEvent("message", func(so socketio.Socket, data string) {
-			logrus.Info(data)
+			log.Println(data)
 		})
 
 	http.ListenAndServe(":8081", server)
@@ -90,7 +90,7 @@ socket.on('disconnect', function() {
 Server:
 ```go
 	so.Emit("ack", "foo", func(msg string) {
-		logrus.Info(msg)
+		log.Println(msg)
 	})
 ```
 Client:
@@ -106,7 +106,7 @@ Client:
 Server:
 ```go
 	server.Namespace("/").OnEvent("foobar", func(data string) (string, string) {
-		logrus.Info("foobar:", data)
+		log.Println("foobar:", data)
 		return "foo", "bar"
 	})
 ```
@@ -124,7 +124,7 @@ Server:
 ```go
 	server.Namespace("/").
 		OnEvent("binary", func(data interface{}, b *socketio.Bytes) {
-			logrus.Info(data)
+			log.Println(data)
 			bb, _ := b.MarshalBinary()
 			log.Printf("%x", bb)
 		}).
@@ -134,7 +134,7 @@ Server:
 					select {
 					case <-time.After(time.Second * 2):
 						if err := so.Emit("event", "check it out!", time.Now()); err != nil {
-							logrus.Info(err)
+							log.Println(err)
 							return
 						}
 					}
