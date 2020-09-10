@@ -1,12 +1,11 @@
 package socketio
 
 import (
+	"github.com/sirupsen/logrus"
+	"github.com/zyxar/socketio/engine"
 	"net/http"
 	"sync"
 	"time"
-
-	"github.com/sirupsen/logrus"
-	"github.com/zyxar/socketio/engine"
 )
 
 // Server is socket.io server implementation
@@ -44,7 +43,7 @@ func NewServer(interval, timeout time.Duration, parser Parser, oc ...engine.Orig
 	if err != nil {
 		return
 	}
-	server = &Server{engine: e, sockets: make(map[*engine.Socket]*socket), nsps: make(map[string]*namespace)}
+	server = &Server{engine: e, sockets: make(map[*engine.Socket]*socket), nsps: make(map[string]*namespace), rooms: make(map[string]map[string]*socket)}
 
 	e.On(engine.EventMessage, engine.Callback(func(ß *engine.Socket, msgType engine.MessageType, data []byte) {
 		server.sockLock.RLock()
