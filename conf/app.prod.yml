@@ -1,0 +1,21 @@
+# 认证
+auth:
+  # token有效期, 已小时为单位, 7 * 24
+  duration: 168
+  secretKey: secretKey
+
+# database
+db:
+  type: mysql
+  connStr: "root:rootroot@tcp(127.0.0.1:3306)/ghchat?charset=utf8&parseTime=True&loc=Local"
+  maxIdleConn: 10
+  maxOpenConn: 100
+
+# redis
+redis:
+  addr: redis-18354.c295.ap-southeast-1-1.ec2.cloud.redislabs.com:18354
+  password: rootroot
+  db: 0
+
+# 业务配置
+app:

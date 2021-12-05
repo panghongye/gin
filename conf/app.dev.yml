@@ -13,10 +13,9 @@ db:
 
 # redis
 redis:
-  addr: 127.0.0.1:6379
-  password: 
-  db: 1
+  addr: redis-18354.c295.ap-southeast-1-1.ec2.cloud.redislabs.com:18354
+  password: rootroot
+  db: 0
 
 # 业务配置
 app:
-
