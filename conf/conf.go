@@ -13,11 +13,10 @@ import (
 func init() {
 
 	// log
-	log.SetFormatter(&log.JSONFormatter{})
-	//log.SetLevel(log.InfoLevel)
+	// log.SetFormatter(&log.JSONFormatter{})
+	// log.SetLevel(log.InfoLevel)
 	// log.SetReportCaller(true)
-
-	//rl, _ := rotatelogs.New("log/app.%Y%m%d%H%M.log")
+	// rl, _ := rotatelogs.New("log/app.%Y%m%d%H%M.log")
 	rl, _ := rotatelogs.New("log/app.%Y%m%d.log")
 	mw := io.MultiWriter(os.Stdout, rl)
 	log.SetOutput(mw)
@@ -27,31 +26,23 @@ func init() {
 	viper.AddConfigPath("conf") // path to look for the config file in
 	viper.SetEnvPrefix("APP")
 	viper.SetConfigType("yml")
+	viper.SetConfigName("app") // name of config file (without extension)/
 
-	viper.SetConfigName("app")  // name of config file (without extension)
-	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil {             // Handle errors reading the config file
+	// Find and read the config file
+	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
 		log.Error("Fatal error config file", err)
+		panic(err)
 	}
-
-	// watch
-	viper.WatchConfig()
-
 	// 配置文件读取, prod/dev -> app, 会优先读取prod/dev, 然后是app.yml, 优先环境变量，其次命令行参数
 	var profile = viper.GetString("profile")
 	log.Info("app profile = ", profile)
 	if profile != "" {
 		viper.SetConfigName("app." + profile)
-
-		err = viper.MergeInConfig()
-		if err != nil { // Handle errors reading the config file
+		if err := viper.MergeInConfig(); err != nil { // Handle errors reading the config file
 			log.Error("Fatal error config file", err)
 		}
-
-		// watch
-		viper.WatchConfig()
 	}
-
+	viper.WatchConfig() // watch
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Info("Config file changed:", e.Name)
 		log.Info("app name ", viper.GetString("name"))
