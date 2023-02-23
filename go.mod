@@ -20,5 +20,5 @@ require (
 	github.com/tebeka/strftime v0.1.5 // indirect
 	github.com/tinylib/msgp v1.1.2
 	github.com/zyxar/socketio v0.0.0-20200825150921-08cc18ef3df3
-	golang.org/x/text v0.3.3
+	golang.org/x/text v0.3.8
 )
