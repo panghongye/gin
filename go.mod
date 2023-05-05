@@ -6,7 +6,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.7.0
+	github.com/gin-gonic/gin v1.9.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jinzhu/gorm v1.9.16
@@ -20,5 +20,5 @@ require (
 	github.com/tebeka/strftime v0.1.5 // indirect
 	github.com/tinylib/msgp v1.1.2
 	github.com/zyxar/socketio v0.0.0-20200825150921-08cc18ef3df3
-	golang.org/x/text v0.3.3
+	golang.org/x/text v0.7.0
 )
