@@ -13,7 +13,7 @@ db:
 
 # redis
 redis:
-  addr: redis-18354.c295.ap-southeast-1-1.ec2.cloud.redislabs.com:18354
+  addr: localhost:63791
   password: rootroot
   db: 0
 
