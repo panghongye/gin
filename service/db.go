@@ -2,10 +2,11 @@ package service
 
 import (
 	"gin/model/table"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	_ "github.com/spf13/viper"
+	_"github.com/spf13/viper"
 )
 
 var (

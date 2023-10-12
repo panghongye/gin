@@ -7,7 +7,7 @@ auth:
 # database
 db:
   type: mysql
-  connStr: "root:rootroot@tcp(127.0.0.1:3306)/ghchat?charset=utf8&parseTime=True&loc=Local"
+  connStr: "root:rootroot@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local"
   maxIdleConn: 10
   maxOpenConn: 100
 
