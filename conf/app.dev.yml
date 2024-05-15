@@ -13,8 +13,8 @@ db:
 
 # redis
 redis:
-  addr: redis-14305.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:14305
-  password: rootroot
+  addr: redis-15030.c295.ap-southeast-1-1.ec2.redns.redis-cloud.com:15030
+  password: WEr84HPuzcTDtaLGN23UdtbxShl8Vh3z
   db: 0
 
 # 业务配置

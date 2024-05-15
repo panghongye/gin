@@ -86,7 +86,6 @@ func getWs() *socketio.Server {
 				msg := groupService.FindGroupMsgByGroupID(group.ID, 0, 20)
 				if group.IsFriend == 1 {
 					group.Name = groupService.FindFriendNameByGroupUser(group.ID, userID)
-
 				}
 				groups = append(groups, Group{group, msg})
 			}
