@@ -1,11 +1,13 @@
 package service
 
 import (
+	"fmt"
 	"gin/model/table"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+	// _ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
 
@@ -16,8 +18,11 @@ var (
 func init() {
 	var err error
 	// db, err = gorm.Open("sqlite3", "./test.db")
+	// db, err := sql.Open("sqlite3", "./test.db")
+	// db, err = gorm.Open("mysql", viper.GetString("db.connStr"))
 	db, err = gorm.Open("mysql", viper.GetString("db.connStr"))
 	if err != nil {
+		fmt.Println("connect db error")
 		panic(err.Error())
 	}
 	db.LogMode(true)
