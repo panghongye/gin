@@ -1,11 +1,11 @@
 # 认证
 auth:
-  # token有效期, 已小时为单位, 7 * 24
+  # token有效期, 小时为单位, 7 * 24
   duration: 168
   secretKey: secretKey
 
 # database
-db:
+mysql:
   type: mysql
   connStr: "root:rootroot@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local"
   maxIdleConn: 10

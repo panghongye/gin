@@ -6,6 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+
 	// _ "github.com/jinzhu/gorm/dialects/sqlite"
 	// _ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
@@ -19,8 +20,7 @@ func init() {
 	var err error
 	// db, err = gorm.Open("sqlite3", "./test.db")
 	// db, err := sql.Open("sqlite3", "./test.db")
-	// db, err = gorm.Open("mysql", viper.GetString("db.connStr"))
-	db, err = gorm.Open("mysql", viper.GetString("db.connStr"))
+	db, err = gorm.Open("mysql", viper.GetString("mysql.connStr"))
 	if err != nil {
 		fmt.Println("connect db error")
 		panic(err.Error())

@@ -24,7 +24,6 @@ func BuildRouter() *gin.Engine {
 		v1.POST("/register", userCtrl.Register)
 		v1.POST("/github_oauth")
 		router.Any("/socket.io/*any", middleware.Auth, gin.WrapH(getWs()))
-		// router.Any("/socket.io/*any", gin.WrapH(getWs()))
 	}
 	return router
 }
